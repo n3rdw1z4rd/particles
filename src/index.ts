@@ -45,14 +45,13 @@ const particlesColors: Color[] = [
     Color.BLUE,
     Color.YELLOW,
     Color.MAGENTA,
+    // Color.ORANGE,
+    // Color.CYAN,
 ];
 
 const particleCount: number = 1000;
 const frictionHalfLife: number = 0.04;
-const force: number = 0.5;
 const radius: number = 0.05;
-const speed: number = 1.0;
-const screenPadding: number = 0;
 
 const attractionMatrix: number[][] = rng.randomMatrix(particlesColors.length);
 
@@ -73,7 +72,7 @@ const calcForce = (r: number, a: number, beta: number = 0.3): number => (r < bet
         : 0;
 
 const updateParticles = (dt: number) => {
-    const frictionFactor: number = Math.pow(0.5, (clock.deltaTimeSeconds * speed) / frictionHalfLife);
+    const frictionFactor: number = Math.pow(0.5, clock.deltaTimeSeconds / frictionHalfLife);
 
     for (let i = 0; i < particles.count; i++) {
         let totalForceX: number = 0;
@@ -97,8 +96,8 @@ const updateParticles = (dt: number) => {
             }
         }
 
-        totalForceX *= radius * force;
-        totalForceY *= radius * force;
+        totalForceX *= radius * 0.5;
+        totalForceY *= radius * 0.5;
 
         particles.vx[i] *= frictionFactor;
         particles.vy[i] *= frictionFactor;
@@ -110,14 +109,14 @@ const updateParticles = (dt: number) => {
 
 const drawParticles = () => {
     for (let i = 0; i < particles.count; i++) {
-        particles.px[i] += particles.vx[i] * (clock.deltaTimeSeconds * speed);
-        particles.py[i] += particles.vy[i] * (clock.deltaTimeSeconds * speed);
+        particles.px[i] += particles.vx[i] * clock.deltaTimeSeconds;
+        particles.py[i] += particles.vy[i] * clock.deltaTimeSeconds;
 
-        if (particles.px[i] < screenPadding) particles.px[i] = 1 + (particles.px[i] % 1);
-        if (particles.px[i] > 1 - screenPadding) particles.px[i] = particles.px[i] % 1;
+        if (particles.px[i] < 0) particles.px[i] = 1 + (particles.px[i] % 1);
+        if (particles.px[i] > 1) particles.px[i] = particles.px[i] % 1;
 
-        if (particles.py[i] < screenPadding) particles.py[i] = 1 + (particles.py[i] % 1);
-        if (particles.py[i] > 1 - screenPadding) particles.py[i] = particles.py[i] % 1;
+        if (particles.py[i] < 0) particles.py[i] = 1 + (particles.py[i] % 1);
+        if (particles.py[i] > 1) particles.py[i] = particles.py[i] % 1;
 
         renderer.setPixel(
             particles.px[i] * renderer.width,
@@ -141,7 +140,5 @@ clock.run(() => {
         colorCount: particlesColors.length,
         frictionHalfLife,
         radius,
-        force,
-        screenPadding,
     });
 }); 
