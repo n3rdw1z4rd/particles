@@ -61,6 +61,7 @@ const attractionMatrix: number[][] = rng.randomMatrix(particlesColors.length);
 const frictionHalfLife: number = 0.04;
 const force: number = 0.5;
 const radius: number = 0.05;
+const speed: number = 1.0;
 
 const calcForce = (r: number, a: number, beta: number = 0.3): number => (r < beta)
     ? r / beta - 1
@@ -68,10 +69,8 @@ const calcForce = (r: number, a: number, beta: number = 0.3): number => (r < bet
         ? a * (1 - Math.abs(2 * r - 1 - beta) / (1 - beta))
         : 0;
 
-const calcSpeed = (speedFactor: number = 1.0): number => clock.deltaTimeSeconds * speedFactor;
-
 const updateParticles = (dt: number) => {
-    const frictionFactor: number = Math.pow(0.5, calcSpeed() / frictionHalfLife);
+    const frictionFactor: number = Math.pow(0.5, (clock.deltaTimeSeconds * speed) / frictionHalfLife);
 
     for (let i = 0; i < particles.count; i++) {
         let totalForceX: number = 0;
@@ -108,8 +107,8 @@ const updateParticles = (dt: number) => {
 
 const drawParticles = () => {
     for (let i = 0; i < particles.count; i++) {
-        particles.px[i] += particles.vx[i] * calcSpeed();
-        particles.py[i] += particles.vy[i] * calcSpeed();
+        particles.px[i] += particles.vx[i] * (clock.deltaTimeSeconds * speed);
+        particles.py[i] += particles.vy[i] * (clock.deltaTimeSeconds * speed);
 
         if (particles.px[i] < 0) particles.px[i] = 1 + (particles.px[i] % 1);
         if (particles.px[i] > 1) particles.px[i] = particles.px[i] % 1;
