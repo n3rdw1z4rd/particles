@@ -58,8 +58,9 @@ for (let i = 0; i < particles.count; i++) {
 }
 
 const attractionMatrix: number[][] = rng.randomMatrix(particlesColors.length);
-const maxRadiusFactor: number = 0.1;
-const forceFactor: number = 0.5;
+const frictionHalfLife: number = 0.04;
+const force: number = 0.5;
+const radius: number = 0.05;
 
 const calcForce = (r: number, a: number, beta: number = 0.3): number => (r < beta)
     ? r / beta - 1
@@ -68,8 +69,6 @@ const calcForce = (r: number, a: number, beta: number = 0.3): number => (r < bet
         : 0;
 
 const calcSpeed = (speedFactor: number = 1.0): number => clock.deltaTimeSeconds * speedFactor;
-
-const frictionHalfLife: number = 0.04;
 
 const updateParticles = (dt: number) => {
     const frictionFactor: number = Math.pow(0.5, calcSpeed() / frictionHalfLife);
@@ -84,20 +83,20 @@ const updateParticles = (dt: number) => {
             let rx: number = particles.px[j] - particles.px[i];
             let ry: number = particles.py[j] - particles.py[i];
 
-            const r: number = Math.hypot(rx, ry);
+            const distance: number = Math.hypot(rx, ry);
 
-            if (r > 0 && r < maxRadiusFactor) {
+            if (distance > 0 && distance < radius) {
                 const f: number = calcForce(
-                    r / maxRadiusFactor,
+                    distance / radius,
                     attractionMatrix[particles.color[i]][particles.color[j]]);
 
-                totalForceX += rx / r * f;
-                totalForceY += ry / r * f;
+                totalForceX += rx / distance * f;
+                totalForceY += ry / distance * f;
             }
         }
 
-        totalForceX *= maxRadiusFactor * forceFactor;
-        totalForceY *= maxRadiusFactor * forceFactor;
+        totalForceX *= radius * force;
+        totalForceY *= radius * force;
 
         particles.vx[i] *= frictionFactor;
         particles.vy[i] *= frictionFactor;
@@ -129,9 +128,14 @@ const drawParticles = () => {
 clock.run(() => {
     updateParticles(clock.deltaTimeSeconds);
     drawParticles();
+
     renderer.render();
+
     clock.showStats({
         seed: rng.originalSeed,
-        particleCount: particles.count
+        particleCount: particles.count,
+        frictionHalfLife: frictionHalfLife,
+        radius: radius,
+        force: force,
     });
 }); 
