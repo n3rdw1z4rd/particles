@@ -3,6 +3,7 @@ export * from './clock';
 export * from './color';
 export * from './ecs';
 export * from './emitter';
+export * from './helpers';
 export * from './logger';
 export * from './math';
 export * from './rng';
