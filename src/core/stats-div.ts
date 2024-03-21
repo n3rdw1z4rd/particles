@@ -9,6 +9,7 @@ export class StatsDiv {
         this.divElement.style.setProperty('position', 'absolute');
         this.divElement.style.setProperty('top', '4px');
         this.divElement.style.setProperty('right', '4px');
+        this.divElement.style.setProperty('z-index', '9999');
     }
 
     appendTo(target: HTMLElement): void {
