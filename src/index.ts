@@ -23,23 +23,7 @@ if (urlParams.hasOwnProperty('seed')) {
     }
 }
 
-class Particles {
-    public px: Float32Array;
-    public py: Float32Array;
-    public vx: Float32Array;
-    public vy: Float32Array;
-    public color: Uint8Array;
-
-    constructor(public count: number) {
-        this.px = new Float32Array(this.count);
-        this.py = new Float32Array(this.count);
-        this.vx = new Float32Array(this.count);
-        this.vy = new Float32Array(this.count);
-        this.color = new Uint8Array(this.count);
-    }
-}
-
-const particlesColors: Color[] = [
+const colors: Color[] = [
     Color.RED,
     Color.GREEN,
     Color.BLUE,
@@ -51,18 +35,29 @@ const particlesColors: Color[] = [
 
 const particleCount: number = 1000;
 const frictionHalfLife: number = 0.04;
-const radius: number = 0.05;
+const range: number = 0.05;
 
-const attractionMatrix: number[][] = rng.randomMatrix(particlesColors.length);
+const attractionMatrix: number[][] = rng.randomMatrix(colors.length);
+console.debug(attractionMatrix);
 
-const particles: Particles = new Particles(particleCount);
+const particles = {
+    count: particleCount,
+    px: new Float32Array(particleCount),
+    py: new Float32Array(particleCount),
+    pz: new Float32Array(particleCount),
+    vx: new Float32Array(particleCount),
+    vy: new Float32Array(particleCount),
+    vz: new Float32Array(particleCount),
+    color: new Uint8Array(particleCount),
+};
 
 for (let i = 0; i < particles.count; i++) {
     particles.px[i] = rng.nextf;
     particles.py[i] = rng.nextf;
+    particles.pz[i] = 0;
     particles.vx[i] = 0;
     particles.vy[i] = 0;
-    particles.color[i] = rng.range(particlesColors.length - 1);
+    particles.color[i] = rng.range(colors.length - 1);
 }
 
 const calcForce = (r: number, a: number, beta: number = 0.3): number => (r < beta)
@@ -71,7 +66,7 @@ const calcForce = (r: number, a: number, beta: number = 0.3): number => (r < bet
         ? a * (1 - Math.abs(2 * r - 1 - beta) / (1 - beta))
         : 0;
 
-const updateParticles = (dt: number) => {
+const updateParticles = () => {
     const frictionFactor: number = Math.pow(0.5, clock.deltaTimeSeconds / frictionHalfLife);
 
     for (let i = 0; i < particles.count; i++) {
@@ -82,13 +77,16 @@ const updateParticles = (dt: number) => {
             if (j === i) continue;
 
             let rx: number = particles.px[j] - particles.px[i];
+            if (Math.abs(rx) > 0.5) rx = rx > 0 ? rx - 1 : rx + 1;
+
             let ry: number = particles.py[j] - particles.py[i];
+            if (Math.abs(ry) > 0.5) ry = ry > 0 ? ry - 1 : ry + 1;
 
             const distance: number = Math.hypot(rx, ry);
 
-            if (distance > 0 && distance < radius) {
+            if (distance > 0 && distance < range) {
                 const f: number = calcForce(
-                    distance / radius,
+                    distance / range,
                     attractionMatrix[particles.color[i]][particles.color[j]]);
 
                 totalForceX += rx / distance * f;
@@ -96,8 +94,8 @@ const updateParticles = (dt: number) => {
             }
         }
 
-        totalForceX *= radius * 0.5;
-        totalForceY *= radius * 0.5;
+        totalForceX *= range * 0.5;
+        totalForceY *= range * 0.5;
 
         particles.vx[i] *= frictionFactor;
         particles.vy[i] *= frictionFactor;
@@ -121,15 +119,15 @@ const drawParticles = () => {
         renderer.setPixel(
             particles.px[i] * renderer.width,
             particles.py[i] * renderer.height,
-            particlesColors[particles.color[i]],
+            colors[particles.color[i]],
             2,
         );
     }
 };
 
 clock.run(() => {
-    updateParticles(clock.deltaTimeSeconds);
-    drawParticles();
+    const updateTime: number = clock.getExecuteTime(updateParticles);
+    const drawTime: number = clock.getExecuteTime(drawParticles);
 
     renderer.render();
 
@@ -137,8 +135,11 @@ clock.run(() => {
         seed: rng.originalSeed,
     }, {
         particleCount,
-        colorCount: particlesColors.length,
-        frictionHalfLife,
-        radius,
+        colors: colors.length,
+        range,
+        friction: frictionHalfLife,
+    }, {
+        'updateParticles(ms)': updateTime.toFixed(3),
+        'drawParticles(ms)': drawTime.toFixed(3),
     });
-}); 
+});
