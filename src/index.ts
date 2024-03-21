@@ -133,6 +133,8 @@ clock.run(() => {
     clock.showStats({
         seed: rng.originalSeed,
         particleCount: particles.count,
+        colorCount: particlesColors.length,
+    }, {
         frictionHalfLife: frictionHalfLife,
         radius: radius,
         force: force,

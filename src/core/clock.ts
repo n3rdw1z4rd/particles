@@ -68,17 +68,29 @@ export class Clock {
         return performance.now() - now;
     }
 
-    public showStats(data: object = {}) {
+    public showStats(...dataSets: object[]): void {
         if (!this._statsDiv) {
             this._statsDiv = new StatsDiv();
             this._statsDiv.appendTo(document.body);
         }
 
-        this._statsDiv.update({
-            fps: this._fps,
-            'deltaTime(s)': `${this._deltaTimeSeconds.toFixed(3)}`,
-            'avgDeltaTime(ms)': `${this._avgDeltaTime.toFixed(3)}`,
-            ...data,
+        const stats: string[] = [];
+
+        [
+            {
+                fps: this._fps,
+                'deltaTime(s)': `${this._deltaTimeSeconds.toFixed(3)}`,
+                'avgDeltaTime(ms)': `${this._avgDeltaTime.toFixed(3)}`,
+            },
+            ...dataSets,
+        ].forEach((data: object) => {
+            stats.push('<div style="padding: 4px;">');
+            Object.entries(data).forEach(([key, value]) => stats.push(
+                `<span style="color: ${this._statsDiv?.keyColor};">${key}:</span>&nbsp;<span style="color: ${this._statsDiv?.valueColor};">${value}</span><br />`
+            ));
+            stats.push('</div>');
         });
+
+        this._statsDiv.update(stats.join('\n'));
     }
 }

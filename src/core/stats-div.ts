@@ -20,9 +20,13 @@ export class StatsDiv {
         target.appendChild(this.divElement);
     }
 
-    update(data: object): void {
-        this.divElement.innerHTML = Object.entries(data).map(([key, value]) =>
-            `<span style="color: ${this.keyColor};">${key}:</span>&nbsp;<span style="color: ${this.valueColor};">${value}</span>`
-        ).join('<br/>');
+    update(data: object | string): void {
+        if (typeof data === 'string') {
+            this.divElement.innerHTML = data;
+        } else {
+            this.divElement.innerHTML = Object.entries(data).map(([key, value]) =>
+                `<span style="color: ${this.keyColor};">${key}:</span>&nbsp;<span style="color: ${this.valueColor};">${value}</span>`
+            ).join('<br/>');
+        }
     }
 }
