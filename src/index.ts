@@ -1,17 +1,27 @@
-import './core/css/reset.css';
-import './core/css/my-styles.css';
-import { CanvasRenderer, Clock, Color, Logger, StatsDiv, rng } from './core';
-
-const log: Logger = new Logger();
+import './core/css';
+import {
+    CanvasRenderer,
+    Clock,
+    Color,
+    GetUrlParams,
+    StatsDiv,
+    UrlParameters,
+    rng,
+} from './core';
 
 const clock = new Clock();
 const renderer: CanvasRenderer = new CanvasRenderer();
-renderer.appendTo(document.body);
-
 const statsDiv: StatsDiv = new StatsDiv();
+const urlParams: UrlParameters = GetUrlParams();
+
+renderer.appendTo(document.body);
 statsDiv.appendTo(document.body);
 
-rng.seed = 1;
+if (urlParams.hasOwnProperty('seed')) {
+    if (!isNaN(parseInt(urlParams.seed))) {
+        rng.seed = parseInt(urlParams.seed);
+    }
+}
 
 class Particles {
     public px: Float32Array;
@@ -36,7 +46,7 @@ const particlesColors: Color[] = [
     Color.GREEN,
     Color.BLUE,
     Color.YELLOW,
-    // Color.MAGENTA,
+    Color.MAGENTA,
 ];
 
 for (let i = 0; i < particles.count; i++) {
@@ -92,8 +102,8 @@ const updateParticles = (dt: number) => {
         particles.vx[i] *= frictionFactor;
         particles.vy[i] *= frictionFactor;
 
-        particles.vx[i] += totalForceX;// * calcSpeed();
-        particles.vy[i] += totalForceY;// * calcSpeed();
+        particles.vx[i] += totalForceX;
+        particles.vy[i] += totalForceY;
     }
 };
 
@@ -121,7 +131,7 @@ clock.run(() => {
     drawParticles();
     renderer.render();
     clock.showStats({
-        seed: rng.seed,
+        seed: rng.originalSeed,
         particleCount: particles.count
     });
-});
+}); 
