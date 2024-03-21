@@ -28,6 +28,7 @@ module.exports = {
         host: '0.0.0.0',
         port: 3000,
         hot: true,
+        open: 'http://localhost:3000/?seed=auto',
     },
     plugins: [
         new HtmlWebpackPlugin({ inject: true }),
