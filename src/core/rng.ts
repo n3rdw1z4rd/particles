@@ -81,14 +81,15 @@ export class Rng {
         return uid.join('');
     }
 
-    randomMatrix(size: number): number[][] {
+    randomMatrix(size: number, scale: number = 2.0): number[][] {
+        const min: number = scale * 0.5;
         const rows: number[][] = [];
 
         for (let i = 0; i < size; i++) {
             const row: number[] = [];
 
             for (let j = 0; j < size; j++) {
-                row.push(this.nextf * 2 - 1);
+                row.push(this.nextf * scale - min);
             }
 
             rows.push(row);
