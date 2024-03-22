@@ -19,7 +19,7 @@ export class Rng {
         this.__seed = this._seed;
     }
 
-    public get originalSeed(): number {
+    public get startingSeed(): number {
         return this.__seed;
     }
 

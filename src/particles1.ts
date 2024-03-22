@@ -17,8 +17,8 @@ const urlParams: UrlParameters = GetUrlParams();
 renderer.appendTo(document.body);
 statsDiv.appendTo(document.body);
 
-if (urlParams.hasOwnProperty('seed')) {
-    rng.seed = urlParams.seed as number;
+if (urlParams.seed && typeof urlParams.seed === 'number') {
+    rng.seed = urlParams.seed as number || Date.now();
 }
 
 const colors: Color[] = [
@@ -130,7 +130,7 @@ clock.run(() => {
     renderer.render();
 
     clock.showStats({
-        seed: rng.originalSeed,
+        startingSeed: rng.startingSeed,
     }, {
         particleCount,
         colors: colors.length,
