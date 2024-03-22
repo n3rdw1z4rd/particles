@@ -37,10 +37,15 @@ export class SpatialPartition {
 
         for (let dy = -1; dy <= 1; dy++) {
             for (let dx = -1; dx <= 1; dx++) {
-                const nx = x + dx;
-                const ny = y + dy;
+                let nx = x + dx;
+                let ny = y + dy;
 
-                if (nx < 0 || nx >= this.cells[0].length || ny < 0 || ny >= this.cells.length) continue;
+                // Wrap around if out of bounds
+                if (nx < 0) nx = this.cells[0].length - 1;
+                else if (nx >= this.cells[0].length) nx = 0;
+
+                if (ny < 0) ny = this.cells.length - 1;
+                else if (ny >= this.cells.length) ny = 0;
 
                 neighbors.push(this.cells[ny][nx]);
             }
