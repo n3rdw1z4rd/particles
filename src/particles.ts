@@ -11,7 +11,7 @@ const colors: Color[] = [
     Color.GREEN,
     Color.BLUE,
     Color.YELLOW,
-    // Color.MAGENTA,
+    Color.MAGENTA,
     // Color.ORANGE,
     // Color.CYAN,
     // Color.PURPLE,
