@@ -1,3 +1,4 @@
+export * from './app';
 export * from './canvas-renderer';
 export * from './clock';
 export * from './color';

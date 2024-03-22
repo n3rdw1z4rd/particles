@@ -10,6 +10,7 @@ export class Clock {
     private _fps: number = 0;
     private _isRunning: boolean = false;
     private _updateCallback: (deltaTime: number) => void = () => { };
+    private _statsDivParent: HTMLElement;
     private _statsDiv: StatsDiv | undefined;
 
     get fps(): number { return this._fps; }
@@ -17,6 +18,10 @@ export class Clock {
     get deltaTimeMilliseconds(): number { return this._daltaTimeMilliseconds; }
     get avgDeltaTime(): number { return this._avgDeltaTime; }
     get time(): number { return this._lastFrameTime; }
+
+    constructor(statsDivParent?: HTMLElement) {
+        this._statsDivParent = statsDivParent ?? document.body;
+    }
 
     private _update(time: number) {
         this.update(time);
@@ -44,7 +49,7 @@ export class Clock {
         this._avgDeltaTime = (this._avgDeltaTime * this._frameCount + this._daltaTimeMilliseconds) / (this._frameCount + 1);
     }
 
-    public run(callback: (deltaTime: number) => void) {
+    public run(callback: () => void) {
         if (!this._isRunning) {
             this._isRunning = true;
             this._updateCallback = callback;
@@ -52,7 +57,7 @@ export class Clock {
         }
     }
 
-    public runOnce(callback: (deltaTime: number) => void) {
+    public runOnce(callback: () => void) {
         this._isRunning = false;
         this._updateCallback = callback;
         this._update(0);
@@ -71,7 +76,7 @@ export class Clock {
     public showStats(...dataSets: object[]): void {
         if (!this._statsDiv) {
             this._statsDiv = new StatsDiv();
-            this._statsDiv.appendTo(document.body);
+            this._statsDiv.appendTo(this._statsDivParent);
         }
 
         const stats: string[] = [];
