@@ -31,4 +31,21 @@ export class SpatialPartition {
         const cellY = Math.floor(y / this.cellSize);
         return this.cells[cellY][cellX];
     }
+
+    getCellNeighbors(x: number, y: number) {
+        const neighbors = [];
+
+        for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+                const nx = x + dx;
+                const ny = y + dy;
+
+                if (nx < 0 || nx >= this.cells[0].length || ny < 0 || ny >= this.cells.length) continue;
+
+                neighbors.push(this.cells[ny][nx]);
+            }
+        }
+
+        return neighbors;
+    }
 }
