@@ -9,5 +9,6 @@ export * from './helpers';
 export * from './logger';
 export * from './math';
 export * from './rng';
+export * from './spatial-partition';
 export * from './stats-div';
 export * from './webgl-renderer';
