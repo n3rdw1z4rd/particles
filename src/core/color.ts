@@ -107,24 +107,35 @@ export class Color {
     }
 
     public static get BLACK(): Color { return new Color(0, 0, 0, 255); }
-    public static get DARK_GRAY(): Color { return new Color(64, 64, 64, 255); }
     public static get GRAY(): Color { return new Color(128, 128, 128, 255); }
-    public static get LIGHT_GRAY(): Color { return new Color(191, 191, 191, 255); }
     public static get WHITE(): Color { return new Color(255, 255, 255, 255); }
-    public static get LIGHT_RED(): Color { return new Color(255, 128, 128, 255); }
     public static get RED(): Color { return new Color(255, 0, 0, 255); }
-    public static get DARK_RED(): Color { return new Color(128, 0, 0, 255); }
-    public static get LIGHT_GREEN(): Color { return new Color(128, 255, 128, 255); }
     public static get GREEN(): Color { return new Color(0, 255, 0, 255); }
-    public static get DARK_GREEN(): Color { return new Color(0, 128, 0, 255); }
-    public static get LIGHT_BLUE(): Color { return new Color(128, 128, 255, 255); }
     public static get BLUE(): Color { return new Color(0, 0, 255, 255); }
-    public static get DARK_BLUE(): Color { return new Color(0, 0, 128, 255); }
     public static get YELLOW(): Color { return new Color(255, 255, 0, 255); }
     public static get ORANGE(): Color { return new Color(255, 128, 0, 255); }
     public static get PURPLE(): Color { return new Color(128, 0, 128, 255); }
     public static get CYAN(): Color { return new Color(0, 255, 255, 255); }
     public static get MAGENTA(): Color { return new Color(255, 0, 255, 255); }
+
+    public static fromName(name: string): Color {
+        const element = document.createElement('div');
+        element.style.color = name;
+        document.body.appendChild(element);
+
+        const computedColor = getComputedStyle(element).color;
+        document.body.removeChild(element);
+
+        const rgba = computedColor.match(/\d+/g);
+
+        if (rgba && rgba.length === 4) {
+            const [r, g, b, a] = rgba.map(Number);
+            return new Color(r, g, b, a);
+        } else {
+            log.warn(`Color: invalid CSS color name: ${name}. Defaulting to transparent.`);
+            return Color.TRANSPARENT;
+        }
+    }
 
     public static get TRANSPARENT(): Color { return new Color(0, 0, 0, 0); }
 }
