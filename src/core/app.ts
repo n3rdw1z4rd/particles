@@ -5,19 +5,18 @@ import { GetUrlParams, UrlParameters } from './helpers';
 import './css';
 import { Rng } from './rng';
 
-export class App {
+export class App extends Clock {
     public renderer: CanvasRenderer | WebGlRenderer;
-    public clock: Clock;
     public urlParams: UrlParameters;
     public rng: Rng;
 
     constructor(
-        renderer: CanvasRenderer | WebGlRenderer,
+        renderer?: CanvasRenderer | WebGlRenderer,
         parentElement: HTMLElement = document.body,
     ) {
-        this.renderer = renderer;
+        super();
+        this.renderer = renderer ?? new CanvasRenderer();
         this.renderer.appendTo(parentElement);
-        this.clock = new Clock(parentElement);
         this.urlParams = GetUrlParams();
         this.rng = new Rng();
     }

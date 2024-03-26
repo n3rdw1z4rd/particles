@@ -59,9 +59,7 @@ export class CanvasRenderer {
     }
 
     setPixel(x: number, y: number, color: Color, size: number = 2): void {
-        let c = color.hexStr;
-        // log.debug('setPixel', { x, y, c, size });
-        this.bufferContext.fillStyle = c;
+        this.bufferContext.fillStyle = color.hexStr;
         this.bufferContext.fillRect(x - (size / 2), y - (size / 2), size, size);
     }
 
