@@ -1,27 +1,19 @@
 {
     "name": "particles",
+    "private": true,
     "version": "0.1.0",
-    "description": "",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
+    "type": "module",
     "scripts": {
-        "build": "tsc",
-        "dev": "webpack serve",
-        "prepublishOnly": "tsc"
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview"
     },
     "keywords": [],
     "author": "@n3rdw1z4rd",
     "license": "MIT",
     "devDependencies": {
-        "@types/node": "^20.11.16",
-        "css-loader": "^6.10.0",
-        "html-webpack-plugin": "^5.6.0",
-        "style-loader": "^3.3.4",
-        "ts-loader": "^9.5.1",
-        "ts-node": "^10.9.2",
-        "typescript": "^5.3.3",
-        "webpack": "^5.90.1",
-        "webpack-cli": "^5.1.4",
-        "webpack-dev-server": "^5.0.2"
+        "@types/node": "^20.12.12",
+        "typescript": "^5.4.5",
+        "vite": "^5.2.0"
     }
 }

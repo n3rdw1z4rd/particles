@@ -138,14 +138,14 @@ const updatePositions = (deltaTimeSeconds: number) => {
     }
 };
 
-app.clock.run(() => {
-    const frictionFactor: number = Math.pow(0.5, app.clock.deltaTimeSeconds / frictionHalfLife);
+app.run(() => {
+    const frictionFactor: number = Math.pow(0.5, app.deltaTimeSeconds / frictionHalfLife);
 
     updateVelocities(frictionFactor);
-    updatePositions(app.clock.deltaTimeSeconds);
+    updatePositions(app.deltaTimeSeconds);
 
     app.renderer.render();
-    app.clock.showStats(
+    app.showStats(
         { seed: app.rng.startingSeed },
         {
             particleCount,
