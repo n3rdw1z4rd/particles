@@ -12,6 +12,7 @@
   "author": "@n3rdw1z4rd",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^22.10.7",
     "typescript": "^5.4.5",
     "vite": "^6.0.7"
   }

@@ -2,7 +2,8 @@ export class Rng {
     private __seed: number;
     private _seed: number;
 
-    private _uid_characters: string = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    private _uid_characters: string =
+        "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     constructor() {
         this._seed = Date.now();
@@ -26,14 +27,14 @@ export class Rng {
     public get nextf(): number {
         // adapted from: https://github.com/bryc/code/blob/master/jshash/PRNGs.md#splitmix32
         this._seed |= 0;
-        this._seed = this._seed + 0x9e3779b9 | 0;
+        this._seed = (this._seed + 0x9e3779b9) | 0;
 
-        let t: number = this._seed ^ this._seed >>> 16;
+        let t: number = this._seed ^ (this._seed >>> 16);
         t = Math.imul(t, 0x21f0aaad);
-        t = t ^ t >>> 15;
+        t = t ^ (t >>> 15);
         t = Math.imul(t, 0x735a2d97);
 
-        return ((t = t ^ t >>> 15) >>> 0) / 4294967296;
+        return ((t = t ^ (t >>> 15)) >>> 0) / 4294967296;
     }
 
     public get nexti(): number {
@@ -50,14 +51,14 @@ export class Rng {
             }
         }
 
-        return ((this.nextf * (max - min + 1)) + min) | 0;
+        return (this.nextf * (max - min + 1) + min) | 0;
     }
 
     public choose(...args: any[]): any {
         if (args.length === 1) {
             if (Array.isArray(args[0])) {
                 return args[0][this.range(args[0].length - 1)];
-            } else if (typeof args[0] === 'string') {
+            } else if (typeof args[0] === "string") {
                 return args[0].charAt(this.range(args[0].length - 1));
             } else {
                 return args[0];
@@ -68,17 +69,19 @@ export class Rng {
     }
 
     shuffle(value: Array<any> | string): Array<any> | string {
-        if (Array.isArray(value)) {
-            return value.sort((a, b) => (0.5 - this.nextf));
-        } else {
-            return value.split('').sort((a, b) => (0.5 - this.nextf)).join('');
-        }
+        return Array.isArray(value)
+            ? value.sort((_a, _b) => 0.5 - this.nextf)
+            : value
+                  .split("")
+                  .sort((_a, _b) => 0.5 - this.nextf)
+                  .join("");
     }
 
     uid(length: number = 16): string {
         const uid: string[] = [];
-        for (let i = 0; i < length; i++) uid.push(this.choose(this._uid_characters));
-        return uid.join('');
+        for (let i = 0; i < length; i++)
+            uid.push(this.choose(this._uid_characters));
+        return uid.join("");
     }
 
     randomMatrix(size: number, scale: number = 2.0): number[][] {

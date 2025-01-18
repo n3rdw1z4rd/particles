@@ -1,9 +1,15 @@
-import { App, CanvasRenderer, Color, SpatialPartition, SpatialPartitionEntity, clamp } from './core';
+import {
+    App,
+    CanvasRenderer,
+    Color,
+    SpatialPartition,
+    SpatialPartitionEntity,
+} from "./core";
 
 const app: App = new App(new CanvasRenderer());
 
-if (app.urlParams.seed && typeof app.urlParams.seed === 'number') {
-    app.rng.seed = app.urlParams.seed as number || Date.now();
+if (app.urlParams.seed && typeof app.urlParams.seed === "number") {
+    app.rng.seed = (app.urlParams.seed as number) || Date.now();
 }
 
 const colors: Color[] = [
@@ -18,19 +24,19 @@ const colors: Color[] = [
 ];
 
 interface Particle extends SpatialPartitionEntity {
-    x: number,
-    y: number,
-    vx: number,
-    vy: number,
-    color: number,
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    color: number;
 }
 
-const particleCount: number = app.urlParams.count as number ?? 2000;
+const particleCount: number = (app.urlParams.count as number) ?? 2000;
 const particleSize: number = 2;
 const attractionMatrix: number[][] = app.rng.randomMatrix(colors.length);
 const frictionHalfLife: number = 0.04;
-const range: number = 0.1;//0.01 * colors.length;
-const rangeFactor: number = 0.1;//1.0 - (colors.length * 0.1);
+const range: number = 0.1; //0.01 * colors.length;
+const rangeFactor: number = 0.1; //1.0 - (colors.length * 0.1);
 
 const particles: Particle[] = [];
 
@@ -44,11 +50,12 @@ for (let i = 0; i < particleCount; i++) {
     });
 }
 
-const calcForce = (r: number, a: number, beta: number = 0.3): number => (r < beta)
-    ? r / beta - 1
-    : (beta < r && r < 1)
-        ? a * (1 - Math.abs(2 * r - 1 - beta) / (1 - beta))
-        : 0;
+const calcForce = (r: number, a: number, beta: number = 0.3): number =>
+    r < beta
+        ? r / beta - 1
+        : beta < r && r < 1
+          ? a * (1 - Math.abs(2 * r - 1 - beta) / (1 - beta))
+          : 0;
 
 const spatialPartition = new SpatialPartition(range, particles);
 
@@ -84,10 +91,11 @@ const updateVelocities = (frictionFactor: number) => {
                         if (d > 0 && d < range) {
                             const f: number = calcForce(
                                 d / range,
-                                attractionMatrix[p1.color][p2.color]);
+                                attractionMatrix[p1.color][p2.color],
+                            );
 
-                            fx += rx / d * f;
-                            fy += ry / d * f;
+                            fx += (rx / d) * f;
+                            fy += (ry / d) * f;
                         }
                     }
                 }
@@ -139,7 +147,10 @@ const updatePositions = (deltaTimeSeconds: number) => {
 };
 
 app.run(() => {
-    const frictionFactor: number = Math.pow(0.5, app.deltaTimeSeconds / frictionHalfLife);
+    const frictionFactor: number = Math.pow(
+        0.5,
+        app.deltaTimeSeconds / frictionHalfLife,
+    );
 
     updateVelocities(frictionFactor);
     updatePositions(app.deltaTimeSeconds);
