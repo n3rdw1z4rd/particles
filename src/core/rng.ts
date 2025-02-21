@@ -3,12 +3,14 @@ export class Rng {
     private _seed: number;
 
     private _uid_characters: string =
-        "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
     constructor() {
         this._seed = Date.now();
         this.__seed = this._seed;
         this._uid_characters = this.shuffle(this._uid_characters) as string;
+
+        this.seed = this.nexti;
     }
 
     public get seed(): number {
@@ -58,7 +60,7 @@ export class Rng {
         if (args.length === 1) {
             if (Array.isArray(args[0])) {
                 return args[0][this.range(args[0].length - 1)];
-            } else if (typeof args[0] === "string") {
+            } else if (typeof args[0] === 'string') {
                 return args[0].charAt(this.range(args[0].length - 1));
             } else {
                 return args[0];
@@ -72,16 +74,16 @@ export class Rng {
         return Array.isArray(value)
             ? value.sort((_a, _b) => 0.5 - this.nextf)
             : value
-                  .split("")
-                  .sort((_a, _b) => 0.5 - this.nextf)
-                  .join("");
+                .split('')
+                .sort((_a, _b) => 0.5 - this.nextf)
+                .join('');
     }
 
     uid(length: number = 16): string {
         const uid: string[] = [];
         for (let i = 0; i < length; i++)
             uid.push(this.choose(this._uid_characters));
-        return uid.join("");
+        return uid.join('');
     }
 
     randomMatrix(size: number, scale: number = 2.0): number[][] {

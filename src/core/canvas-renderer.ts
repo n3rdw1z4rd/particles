@@ -10,8 +10,6 @@ export class CanvasRenderer {
     get width(): number { return this._screenCanvas.width; }
     get height(): number { return this._screenCanvas.height; }
 
-    pixelRatio: number = window.devicePixelRatio;
-
     constructor(canvas?: HTMLCanvasElement) {
         this._screenCanvas = canvas ?? document.createElement('canvas');
         this._bufferCanvas = new OffscreenCanvas(this._screenCanvas.width, this._screenCanvas.height);
@@ -42,8 +40,8 @@ export class CanvasRenderer {
             this._screenCanvas.getBoundingClientRect()
         );
 
-        displayWidth = (0 | (displayWidth ?? width) * this.pixelRatio);
-        displayHeight = (0 | (displayHeight ?? height) * this.pixelRatio);
+        displayWidth = (0 | (displayWidth ?? width));
+        displayHeight = (0 | (displayHeight ?? height));
 
         if (this._screenCanvas.width !== displayWidth || this._screenCanvas.height !== displayHeight) {
             this._screenCanvas.width = displayWidth

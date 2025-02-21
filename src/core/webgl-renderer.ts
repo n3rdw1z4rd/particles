@@ -12,8 +12,6 @@ export class WebGlRenderer {
     private _texture: WebGLTexture;
     private _surface: WebGLBuffer;
 
-    public pixelRatio: number = window.devicePixelRatio;
-
     public get width(): number { return this._canvas.width; }
     public get height(): number { return this._canvas.height; }
 
@@ -116,8 +114,8 @@ export class WebGlRenderer {
             this._canvas.getBoundingClientRect()
         );
 
-        displayWidth = (0 | (displayWidth ?? width) * this.pixelRatio);
-        displayHeight = (0 | (displayHeight ?? height) * this.pixelRatio);
+        displayWidth = (0 | (displayWidth ?? width));
+        displayHeight = (0 | (displayHeight ?? height));
 
         if (this._canvas.width !== displayWidth || this._canvas.height !== displayHeight) {
             this._canvas.width = displayWidth
