@@ -6,7 +6,10 @@ import {
     SpatialPartitionEntity,
 } from "./core";
 
-const app: App = new App(new CanvasRenderer());
+const app: App = new App(
+    new CanvasRenderer(),
+    document.getElementById('root')!
+);
 
 if (app.urlParams.seed && typeof app.urlParams.seed === "number") {
     app.rng.seed = (app.urlParams.seed as number) || Date.now();
