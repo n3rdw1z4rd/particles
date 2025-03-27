@@ -1,3 +1,5 @@
+import { VEC2 } from './math';
+
 export class Rng {
     private __seed: number;
     private _seed: number;
