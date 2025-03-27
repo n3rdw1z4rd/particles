@@ -93,7 +93,6 @@ export class Clock {
         this._stats.update({
             fps: this._fps,
             'deltaTime(s)': `${this._deltaTimeSeconds.toFixed(3)}`,
-            'avgDeltaTime(ms)': `${this._avgDeltaTime.toFixed(3)}`,
             ...data,
         });
     }
