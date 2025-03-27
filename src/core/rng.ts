@@ -70,7 +70,7 @@ export class Rng {
         }
     }
 
-    shuffle(value: Array<any> | string): Array<any> | string {
+    public shuffle(value: Array<any> | string): Array<any> | string {
         return Array.isArray(value)
             ? value.sort((_a, _b) => 0.5 - this.nextf)
             : value
@@ -79,28 +79,32 @@ export class Rng {
                 .join('');
     }
 
-    uid(length: number = 16): string {
+    public uid(length: number = 16): string {
         const uid: string[] = [];
         for (let i = 0; i < length; i++)
             uid.push(this.choose(this._uid_characters));
         return uid.join('');
     }
 
-    randomMatrix(size: number, scale: number = 2.0): number[][] {
-        const min: number = scale * 0.5;
+    public randomMatrix(size: number): number[][] {
         const rows: number[][] = [];
 
         for (let i = 0; i < size; i++) {
             const row: number[] = [];
 
             for (let j = 0; j < size; j++) {
-                row.push(this.nextf * scale - min);
+                row.push(this.nextf * 2 - 1);
             }
 
             rows.push(row);
         }
 
         return rows;
+    }
+
+    public randomUnitVector(): VEC2 {
+        const theta = rng.nextf * 2 * Math.PI;
+        return [Math.cos(theta), Math.sin(theta)];
     }
 }
 

@@ -1,29 +1,30 @@
+export type Listener = (...args: any[]) => void;
+
 export class Emitter {
-    private listeners: any;
+    private listeners: Map<string, Listener[]> = new Map<string, Listener[]>();
 
-    constructor() {
-        this.listeners = {};
-    }
+    constructor() { }
 
-    on(events: Array<string> | string, callback: Function): Emitter {
-        if (!Array.isArray(events)) {
-            events = [events];
-        }
+    public on<T extends string[]>(...eventName: [...T, Listener]): this {
+        const listener = eventName.pop() as Listener;
+        const events: string[] = eventName.filter((ev: any) => (typeof ev === 'string')) as string[];
 
         events.forEach((event: string) => {
-            if (!(event in this.listeners)) {
-                this.listeners[event] = [callback];
-            } else {
-                this.listeners[event].push(callback);
+            if (!this.listeners.has(event)) {
+                this.listeners.set(event, new Array<Listener>());
             }
+
+            this.listeners.get(event)?.push(listener);
         });
 
         return this;
     }
 
-    emit(event: string, ...args: any): Emitter {
-        this.listeners[event]?.forEach((callback: Function) => callback.apply(null, args));
+    public emit(eventName: string, ...args: any[]): this {
+        this.listeners.get(eventName)?.forEach((listener: Listener) => listener(...args, eventName));
 
         return this;
     }
 }
+
+export const GlobalEmitter = new Emitter();

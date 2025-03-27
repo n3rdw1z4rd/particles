@@ -17,5 +17,8 @@
     "@types/node": "^22.13.13",
     "typescript": "^5.8.2",
     "vite": "^6.2.3"
+  },
+  "dependencies": {
+    "lil-gui": "^0.20.0"
   }
 }
