@@ -1,5 +1,5 @@
 # Use an official Node.js base image.  Choose the LTS version for stability.
-FROM node:22-alpine  # Consider Alpine for smaller image size
+FROM node:22-alpine
 
 # Set the working directory inside the container
 WORKDIR /app
