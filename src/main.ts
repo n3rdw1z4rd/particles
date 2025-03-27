@@ -39,13 +39,7 @@ const params: KeyValue = {
     rangeFactor: 0.1,
 };
 
-// const particleCount: number = (app.urlParams.count as number) ?? 2000;
-// const particleSize: number = 2;
 const attractionMatrix: number[][] = rng.randomMatrix(colors.length);
-// const frictionHalfLife: number = 0.04;
-// const range: number = 0.1; //0.01 * colors.length;
-// const rangeFactor: number = 0.1; //1.0 - (colors.length * 0.1);
-
 const particles: Particle[] = [];
 
 for (let i = 0; i < params.particleCount; i++) {
@@ -166,8 +160,8 @@ clock.run((deltaTimeSeconds: number) => {
     renderer.render();
 
     clock.showStats(
-        // { seed: rng.startingSeed },
         {
+            seed: rng.startingSeed,
             particleCount: params.particleCount,
             colorCount: colors.length,
             range: params.range,

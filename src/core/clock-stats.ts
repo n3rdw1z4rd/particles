@@ -1,4 +1,4 @@
-import './css/clock-stats.css';
+import './clock-stats.css';
 
 export class ClockStats {
     public divElement: HTMLDivElement;

@@ -26,5 +26,3 @@ export class Emitter {
         return this;
     }
 }
-
-export const GlobalEmitter = new Emitter();

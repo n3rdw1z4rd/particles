@@ -19,6 +19,7 @@
     "vite": "^6.2.3"
   },
   "dependencies": {
-    "lil-gui": "^0.20.0"
+    "lil-gui": "^0.20.0",
+    "simplex-noise": "^4.0.3"
   }
 }
