@@ -1,11 +1,11 @@
-import { CanvasRenderer } from './core/canvas-renderer';
 import { Clock } from './core/clock';
 import { Color } from './core/color';
 import { rng } from './core/rng';
 import { SpatialPartition, SpatialPartitionEntity } from './core/spatial-partition';
+import { WebGlRenderer } from './core/webgl-renderer';
 
 const clock = new Clock();
-const renderer = new CanvasRenderer();
+const renderer = new WebGlRenderer();
 renderer.appendTo(document.getElementById('root')!);
 
 // if (app.urlParams.seed && typeof app.urlParams.seed === "number") {

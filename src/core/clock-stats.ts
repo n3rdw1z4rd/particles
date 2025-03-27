@@ -7,7 +7,7 @@ export class ClockStats {
     public valueColor: string = 'lightgray';
 
     constructor(
-        align: ('top' | 'bottom') = 'bottom',
+        align: ('top' | 'bottom') = 'top',
         justify: ('left' | 'right') = 'right',
     ) {
         this.divElement = document.createElement('div');
