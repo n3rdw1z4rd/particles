@@ -1,5 +1,7 @@
 import { Clock } from './core/clock';
 import { Color } from './core/color';
+import { log } from './core/logger';
+import { GetUrlParams } from './core/misc';
 import { rng } from './core/rng';
 import { SpatialPartition, SpatialPartitionEntity } from './core/spatial-partition';
 import { WebGlRenderer } from './core/webgl-renderer';
@@ -8,9 +10,12 @@ const clock = new Clock();
 const renderer = new WebGlRenderer();
 renderer.appendTo(document.getElementById('root')!);
 
-// if (app.urlParams.seed && typeof app.urlParams.seed === "number") {
-//     app.rng.seed = (app.urlParams.seed as number) || Date.now();
-// }
+const urlParams = GetUrlParams();
+log('urlParams:', urlParams);
+
+if (urlParams.seed && typeof urlParams.seed === 'number') {
+    rng.seed = urlParams.seed;
+}
 
 const colors: Color[] = [
     Color.RED,
@@ -52,12 +57,17 @@ for (let i = 0; i < params.particleCount; i++) {
     });
 }
 
-const calcForce = (r: number, a: number, beta: number = 0.3): number =>
-    r < beta
-        ? r / beta - 1
-        : beta < r && r < 1
-            ? a * (1 - Math.abs(2 * r - 1 - beta) / (1 - beta))
-            : 0;
+const calcForce = (r: number, a: number, beta: number = 0.3): number => {
+    let f = 0;
+
+    if (r < beta) {
+        f = r / beta - 1;
+    } else if (beta < r && r < 1) {
+        f = a * (1 - Math.abs(2 * r - 1 - beta) / (1 - beta));
+    }
+
+    return f;
+};
 
 const spatialPartition = new SpatialPartition(params.range, particles);
 
@@ -159,13 +169,11 @@ clock.run((deltaTimeSeconds: number) => {
 
     renderer.render();
 
-    clock.showStats(
-        {
-            seed: rng.startingSeed,
-            particleCount: params.particleCount,
-            colorCount: colors.length,
-            range: params.range,
-            rangeFactor: params.rangeFactor,
-        },
-    );
+    clock.showStats({
+        seed: rng.startingSeed,
+        particleCount: params.particleCount,
+        colorCount: colors.length,
+        range: params.range,
+        rangeFactor: params.rangeFactor,
+    });
 });
