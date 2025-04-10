@@ -157,4 +157,3 @@ export class WebGlRenderer {
         this._pixelBuffer.fill(0);
     }
 }
-

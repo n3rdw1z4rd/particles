@@ -67,4 +67,3 @@ export class CanvasRenderer {
         this.bufferContext.clearRect(0, 0, this._screenCanvas.width, this._screenCanvas.height);
     }
 }
-
