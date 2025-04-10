@@ -13,7 +13,7 @@ renderer.appendTo(document.getElementById('root')!);
 const urlParams = GetUrlParams();
 log('urlParams:', urlParams);
 
-if (urlParams.seed && typeof urlParams.seed === 'number') {
+if (urlParams.seed) {
     rng.seed = urlParams.seed;
 }
 
@@ -37,8 +37,8 @@ interface Particle extends SpatialPartitionEntity {
 }
 
 const params: KeyValue = {
-    particleCount: 2000,
-    particleSize: 2,
+    particleCount: urlParams.count ?? 2000,
+    particleSize: urlParams.size ?? 2,
     frictionHalfLife: 0.04,
     range: 0.1,
     rangeFactor: 0.1,

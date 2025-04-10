@@ -8,7 +8,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "docker-build": "docker build -t particles .",
-    "docker-run": "docker run -d -p 5173:5173 particles"
+    "docker-run": "docker run -d -p 4000:4000 particles"
   },
   "keywords": [],
   "author": "@n3rdw1z4rd",
