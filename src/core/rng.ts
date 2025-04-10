@@ -47,15 +47,11 @@ export class Rng {
 
     public range(min: number, max?: number): number {
         if (max === undefined) {
-            if (min !== 0) {
-                max = min;
-                min = 0;
-            } else {
-                max = Number.MAX_SAFE_INTEGER;
-            }
+            max = min;
+            min = 0;
         }
 
-        return (this.nextf * (max - min + 1) + min) | 0;
+        return (min + this.nextf * (max - min)) | 0;
     }
 
     public choose(...args: any[]): any {
