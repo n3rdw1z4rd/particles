@@ -14,7 +14,7 @@ const urlParams = GetUrlParams();
 log('urlParams:', urlParams);
 
 if (urlParams.seed) {
-    rng.seed = urlParams.seed;
+    rng.seed = urlParams.seed as number;
 }
 
 const colors: Color[] = [
