@@ -1,21 +1,29 @@
 import { Clock } from './clock';
 import { Color } from './color';
-import { log } from './logger';
 import { GetUrlParams } from './misc';
+import { log } from './logger';
+import { Renderer } from './renderer';
 import { rng } from './rng';
 import { SpatialPartition, SpatialPartitionEntity } from './spatial-partition';
-import { Renderer } from './renderer';
 
-const clock = new Clock();
-const renderer = new Renderer();
-renderer.appendTo(document.getElementById('root')!);
+interface Particle extends SpatialPartitionEntity {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    color: number;
+}
 
 const urlParams = GetUrlParams();
 log('urlParams:', urlParams);
 
-if (urlParams.seed) {
-    rng.seed = urlParams.seed as number;
+if (typeof urlParams.seed === 'number') {
+    rng.seed = urlParams.seed;
 }
+
+const clock = new Clock();
+const renderer = new Renderer();
+renderer.appendTo(document.getElementById('root')!);
 
 const colors: Color[] = [
     Color.RED,
@@ -28,17 +36,9 @@ const colors: Color[] = [
     // Color.PURPLE,
 ];
 
-interface Particle extends SpatialPartitionEntity {
-    x: number;
-    y: number;
-    vx: number;
-    vy: number;
-    color: number;
-}
-
 const params: KeyValue = {
-    particleCount: urlParams.count ?? 2000,
-    particleSize: urlParams.size ?? 2,
+    particleCount: 2000,
+    particleSize: 2,
     frictionHalfLife: 0.04,
     range: 0.1,
     rangeFactor: 0.1,
@@ -53,7 +53,7 @@ for (let i = 0; i < params.particleCount; i++) {
         y: rng.nextf,
         vx: 0,
         vy: 0,
-        color: rng.range(colors.length - 1),
+        color: rng.range(colors.length),
     });
 }
 
@@ -159,6 +159,8 @@ const updatePositions = (deltaTimeSeconds: number) => {
 };
 
 clock.run((deltaTimeSeconds: number) => {
+    renderer.resize();
+
     const frictionFactor: number = Math.pow(
         0.5,
         deltaTimeSeconds / params.frictionHalfLife,
@@ -175,5 +177,6 @@ clock.run((deltaTimeSeconds: number) => {
         colorCount: colors.length,
         range: params.range,
         rangeFactor: params.rangeFactor,
+        time: (clock.elapsedTimeSinceStart / 1000).toFixed(2),
     });
 });
