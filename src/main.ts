@@ -1,13 +1,13 @@
-import { Clock } from './core/clock';
-import { Color } from './core/color';
-import { log } from './core/logger';
-import { GetUrlParams } from './core/misc';
-import { rng } from './core/rng';
-import { SpatialPartition, SpatialPartitionEntity } from './core/spatial-partition';
-import { WebGlRenderer } from './core/webgl-renderer';
+import { Clock } from './clock';
+import { Color } from './color';
+import { log } from './logger';
+import { GetUrlParams } from './misc';
+import { rng } from './rng';
+import { SpatialPartition, SpatialPartitionEntity } from './spatial-partition';
+import { Renderer } from './renderer';
 
 const clock = new Clock();
-const renderer = new WebGlRenderer();
+const renderer = new Renderer();
 renderer.appendTo(document.getElementById('root')!);
 
 const urlParams = GetUrlParams();

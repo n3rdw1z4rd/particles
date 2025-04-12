@@ -1,6 +1,6 @@
 import { Color } from './color';
 
-export class CanvasRenderer {
+export class Renderer {
     private _screenCanvas: HTMLCanvasElement;
     private _bufferCanvas: OffscreenCanvas;
 
