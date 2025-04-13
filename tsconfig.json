@@ -20,15 +20,6 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "noFallthroughCasesInSwitch": true,
-        /* JSX */
-        "jsx": "react-jsx",
-        "jsxImportSource": "@",
-        "baseUrl": ".",
-        "paths": {
-            "@/*": [
-                "src/*"
-            ]
-        }
     },
     "include": [
         "src"
