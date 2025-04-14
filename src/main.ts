@@ -14,6 +14,8 @@ interface Particle extends SpatialPartitionEntity {
     color: number;
 }
 
+const root = document.getElementById('root')!;
+
 const urlParams = GetUrlParams();
 log('urlParams:', urlParams);
 
@@ -23,7 +25,35 @@ if (typeof urlParams.seed === 'number') {
 
 const clock = new Clock();
 const renderer = new Renderer();
-renderer.appendTo(document.getElementById('root')!);
+renderer.appendTo(root);
+
+const buttonContainer = document.createElement('div');
+buttonContainer.id = 'button-container';
+root.append(buttonContainer);
+
+const setButton = document.createElement('button');
+setButton.innerText = 'set';
+setButton.addEventListener('click', (ev: MouseEvent) => {
+    if (ev.button === 0) {
+        const url = new URL(location.href);
+        url.searchParams.set('seed', String(rng.startingSeed));
+        location.href = url.href;
+    }
+});
+
+buttonContainer.append(setButton);
+
+const resetButton = document.createElement('button');
+resetButton.innerText = 'reset';
+resetButton.addEventListener('click', (ev: MouseEvent) => {
+    if (ev.button === 0) {
+        const url = new URL(location.href);
+        url.searchParams.delete('seed');
+        location.href = url.href;
+    }
+});
+
+buttonContainer.append(resetButton);
 
 const colors: Color[] = [
     Color.RED,

@@ -42,3 +42,16 @@ body,
     margin: 0;
     padding: 0;
 }
+
+#button-container {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    display: flex;
+    flex-direction: column;
+
+    padding: var(--padding-medium);
+    border-radius: var(--border-radius);
+    border: var(--border-style);
+    background: var(--background-opacity-medium);
+}
