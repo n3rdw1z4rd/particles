@@ -1,10 +1,10 @@
-import { Clock } from './utils/clock';
-import { Color } from './utils/color';
-import { UrlParameters } from './utils/misc';
-import { log } from './utils/logger';
-import { Renderer } from './utils/renderer';
-import { rng } from './utils/rng';
-import { SpatialPartition, SpatialPartitionEntity } from './utils/spatial-partition';
+import { Clock } from '../utils/clock';
+import { Color } from '../utils/color';
+import { UrlParameters } from '../utils/misc';
+import { log } from '../utils/logger';
+import { Renderer } from '../utils/renderer';
+import { rng } from '../utils/rng';
+import { SpatialPartition, SpatialPartitionEntity } from './spatial-partition';
 
 interface Particle extends SpatialPartitionEntity {
     x: number;
