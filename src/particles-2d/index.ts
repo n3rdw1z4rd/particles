@@ -4,7 +4,7 @@ import { UrlParameters } from '../utils/misc';
 import { log } from '../utils/logger';
 import { Renderer } from '../utils/renderer';
 import { rng } from '../utils/rng';
-import { SpatialPartition2d, SpatialPartitionEntity2d } from './spatial-partition-2d';
+import { SpatialPartition2d, SpatialPartitionEntity2d } from '../utils/spatial-partition-2d';
 
 interface Particle extends SpatialPartitionEntity2d {
     x: number;
