@@ -21,7 +21,7 @@ export function StartParticleSystem(root: HTMLElement, urlParams: UrlParameters 
         },
     });
 
-    eng.cameraRig.minCameraDistance = 0.5;
+    eng.cameraRig.minCameraDistance = 0.0;
 
     const ps = new ParticleSystem();
     eng.scene.add(ps);
