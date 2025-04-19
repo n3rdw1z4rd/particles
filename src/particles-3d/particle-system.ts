@@ -1,6 +1,6 @@
 import { BufferGeometry, Float32BufferAttribute, Group, PerspectiveCamera, Points, ShaderMaterial, Vector3 } from 'three';
 import { rng } from '../utils/rng';
-import { SpatialPartition, SpatialPartitionEntity } from './spatial-partition';
+import { SpatialPartition3d, SpatialPartitionEntity3d } from './spatial-partition-3d';
 
 const vertexShader = `
 uniform float pointSize;
@@ -23,7 +23,7 @@ void main() {
     gl_FragColor = vColor;
 }`;
 
-interface Particle extends SpatialPartitionEntity {
+interface Particle extends SpatialPartitionEntity3d {
     vx: number,
     vy: number,
     vz: number,
@@ -50,7 +50,7 @@ export class ParticleSystem extends Group {
 
     private _attractionMatrix: number[][];
 
-    private _spatialPartition: SpatialPartition;
+    private _spatialPartition: SpatialPartition3d;
 
     constructor() {
         super();
@@ -93,7 +93,7 @@ export class ParticleSystem extends Group {
 
         this._attractionMatrix = rng.randomMatrix(Colors.length);
 
-        this._spatialPartition = new SpatialPartition(this._range, this._particles);
+        this._spatialPartition = new SpatialPartition3d(this._range, this._particles);
     }
 
     private _calcForce(r: number, a: number, beta: number = 0.3): number {

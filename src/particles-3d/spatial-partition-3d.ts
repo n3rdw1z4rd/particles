@@ -1,15 +1,15 @@
-export interface SpatialPartitionEntity {
+export interface SpatialPartitionEntity3d {
     x: number;
     y: number;
     z: number;
 }
 
-export class SpatialPartition {
-    cells: SpatialPartitionEntity[][][][];
+export class SpatialPartition3d {
+    cells: SpatialPartitionEntity3d[][][][];
     cellSize: number;
-    entities: SpatialPartitionEntity[];
+    entities: SpatialPartitionEntity3d[];
 
-    constructor(cellSize: number, entities: SpatialPartitionEntity[]) {
+    constructor(cellSize: number, entities: SpatialPartitionEntity3d[]) {
         this.cellSize = cellSize;
         this.entities = entities;
 
@@ -30,6 +30,7 @@ export class SpatialPartition {
         const cx = Math.floor(x / this.cellSize);
         const cy = Math.floor(y / this.cellSize);
         const cz = Math.floor(z / this.cellSize);
+
         return this.cells[cz][cy][cx];
     }
 
@@ -43,6 +44,7 @@ export class SpatialPartition {
                     let nx = (cx + dx + gridSize) % gridSize;
                     let ny = (cy + dy + gridSize) % gridSize;
                     let nz = (cz + dz + gridSize) % gridSize;
+
                     neighbors.push(this.cells[nz][ny][nx]);
                 }
             }
@@ -51,8 +53,9 @@ export class SpatialPartition {
         return neighbors;
     }
 
-    addEntity(entity: SpatialPartitionEntity) {
+    addEntity(entity: SpatialPartitionEntity3d) {
         const cell = this.getCell(entity.x, entity.y, entity.z);
+
         cell.push(entity);
     }
 }

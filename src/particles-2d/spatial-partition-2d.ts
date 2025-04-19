@@ -1,14 +1,14 @@
-export interface SpatialPartitionEntity {
+export interface SpatialPartitionEntity2d {
     x: number;
     y: number;
 }
 
-export class SpatialPartition {
-    cells: SpatialPartitionEntity[][][];
+export class SpatialPartition2d {
+    cells: SpatialPartitionEntity2d[][][];
     cellSize: number;
-    entities: SpatialPartitionEntity[];
+    entities: SpatialPartitionEntity2d[];
 
-    constructor(cellSize: number, entities: SpatialPartitionEntity[]) {
+    constructor(cellSize: number, entities: SpatialPartitionEntity2d[]) {
         this.cellSize = cellSize;
         this.entities = entities;
 
@@ -21,7 +21,7 @@ export class SpatialPartition {
         }
     }
 
-    addEntity(entity: SpatialPartitionEntity) {
+    addEntity(entity: SpatialPartitionEntity2d) {
         const cell = this.getCell(entity.x, entity.y);
         cell.push(entity);
     }

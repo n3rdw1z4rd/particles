@@ -4,9 +4,9 @@ import { UrlParameters } from '../utils/misc';
 import { log } from '../utils/logger';
 import { Renderer } from '../utils/renderer';
 import { rng } from '../utils/rng';
-import { SpatialPartition, SpatialPartitionEntity } from './spatial-partition';
+import { SpatialPartition2d, SpatialPartitionEntity2d } from './spatial-partition-2d';
 
-interface Particle extends SpatialPartitionEntity {
+interface Particle extends SpatialPartitionEntity2d {
     x: number;
     y: number;
     vx: number;
@@ -99,7 +99,7 @@ export function StartParticleSystem(root: HTMLElement, urlParams: UrlParameters 
         return f;
     };
 
-    const spatialPartition = new SpatialPartition(params.range, particles);
+    const spatialPartition = new SpatialPartition2d(params.range, particles);
 
     const updateVelocities = (frictionFactor: number) => {
         for (let y = 0; y < spatialPartition.cells.length; y++) {
