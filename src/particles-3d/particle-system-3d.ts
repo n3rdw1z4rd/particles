@@ -1,6 +1,6 @@
 import { BufferGeometry, Float32BufferAttribute, Group, PerspectiveCamera, Points, ShaderMaterial, Vector3 } from 'three';
 import { rng } from '../utils/rng';
-import { SpatialPartition3d, SpatialPartitionEntity3d } from '../utils/spatial-partition-3d';
+import { SpatialPartition3d, SpatialPartitionEntity3d } from './spatial-partition-3d';
 
 const vertexShader = `
 uniform float pointSize;
@@ -41,10 +41,11 @@ const Colors = [
 ];
 
 export class ParticleSystem extends Group {
+    public readonly particleCount = 1000;
+
     private _geometry: BufferGeometry;
     private _particles: Particle[] = [];
     private _frictionHalfLife = 0.04;
-    public readonly particleCount = 1000;
     private _range = 0.2;
     private _rangeFactor = 0.1;
 
@@ -92,7 +93,6 @@ export class ParticleSystem extends Group {
         }
 
         this._attractionMatrix = rng.randomMatrix(Colors.length);
-
         this._spatialPartition = new SpatialPartition3d(this._range, this._particles);
     }
 

@@ -1,6 +1,6 @@
 import { rng } from '../utils/rng';
 import { ThreeJsBoilerPlate } from '../utils/three/threejs-boiler-plate';
-import { ParticleSystem } from './particle-system';
+import { ParticleSystem } from './particle-system-3d';
 
 export function StartParticleSystem3d(root: HTMLElement) {
     const eng = new ThreeJsBoilerPlate({
@@ -22,6 +22,7 @@ export function StartParticleSystem3d(root: HTMLElement) {
         ps.update(eng.camera, dt);
 
         eng.renderer.render(eng.scene, eng.camera);
+
         eng.clock.showStats({
             seed: rng.startingSeed,
             particleCount: ps.particleCount,

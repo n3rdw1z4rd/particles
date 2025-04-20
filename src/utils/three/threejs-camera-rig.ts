@@ -9,19 +9,19 @@ export interface ThreeJsCameraRigParams {
 }
 
 export class ThreeJsCameraRig extends Group {
-    gimbal: Group;
-    camera: PerspectiveCamera;
-    target: Object3D | undefined;
+    public gimbal: Group;
+    public camera: PerspectiveCamera;
+    public target: Object3D | undefined;
 
-    mouseSensitivity: number = 0.01;
-    wheelSensitivity: number = 0.02;
+    public mouseSensitivity: number = 0.01;
+    public wheelSensitivity: number = 0.02;
 
-    minCameraDistance: number = 2;
-    maxCameraDistance: number = 100.0;
+    public minCameraDistance: number = 2;
+    public maxCameraDistance: number = 100.0;
 
-    minTiltAngle: number = deg2rad(-90);
-    maxTiltAngle: number = deg2rad(0);
-    clampTiltAngle: boolean = false;
+    public minTiltAngle: number = deg2rad(-90);
+    public maxTiltAngle: number = deg2rad(0);
+    public clampTiltAngle: boolean = false;
 
     constructor(params?: ThreeJsCameraRigParams) {
         super();
@@ -39,7 +39,7 @@ export class ThreeJsCameraRig extends Group {
         this.gimbal.add(this.camera);
     }
 
-    orbit(deltaX: number, deltaY: number) {
+    public orbit(deltaX: number, deltaY: number) {
         (this.target || this).rotateY(-deltaX * this.mouseSensitivity);
 
         this.gimbal.rotation.x = this.clampTiltAngle
@@ -51,7 +51,7 @@ export class ThreeJsCameraRig extends Group {
             : this.gimbal.rotation.x + (-deltaY * this.mouseSensitivity);
     }
 
-    dolly(deltaY: number) {
+    public dolly(deltaY: number) {
         this.camera.position.z = clamp(
             this.camera.position.z + (deltaY * this.wheelSensitivity),
             this.minCameraDistance,
