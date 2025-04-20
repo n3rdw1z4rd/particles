@@ -1,7 +1,5 @@
 import { Clock } from '../utils/clock';
 import { Color } from '../utils/color';
-import { UrlParameters } from '../utils/misc';
-import { log } from '../utils/logger';
 import { Renderer } from '../utils/renderer';
 import { rng } from '../utils/rng';
 import { SpatialPartition2d, SpatialPartitionEntity2d } from '../utils/spatial-partition-2d';
@@ -14,46 +12,10 @@ interface Particle extends SpatialPartitionEntity2d {
     color: number;
 }
 
-export function StartParticleSystem(root: HTMLElement, urlParams: UrlParameters = {}) {
-    log('*** particles-og ***');
-
-    log('urlParams:', urlParams);
-
-    if (typeof urlParams.seed === 'number') {
-        rng.seed = urlParams.seed;
-    }
-
+export function StartParticleSystem2d(root: HTMLElement, _params: KeyValue = {}) {
     const clock = new Clock();
     const renderer = new Renderer();
     renderer.appendTo(root);
-
-    const buttonContainer = document.createElement('div');
-    buttonContainer.id = 'button-container';
-    root.append(buttonContainer);
-
-    const setButton = document.createElement('button');
-    setButton.innerText = 'set';
-    setButton.addEventListener('click', (ev: MouseEvent) => {
-        if (ev.button === 0) {
-            const url = new URL(location.href);
-            url.searchParams.set('seed', String(rng.startingSeed));
-            location.href = url.href;
-        }
-    });
-
-    buttonContainer.append(setButton);
-
-    const resetButton = document.createElement('button');
-    resetButton.innerText = 'reset';
-    resetButton.addEventListener('click', (ev: MouseEvent) => {
-        if (ev.button === 0) {
-            const url = new URL(location.href);
-            url.searchParams.delete('seed');
-            location.href = url.href;
-        }
-    });
-
-    buttonContainer.append(resetButton);
 
     const colors: Color[] = [
         Color.RED,
