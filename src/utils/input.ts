@@ -24,16 +24,18 @@ export class Input extends Emitter {
     public get mousePosition(): VEC2 { return this._mousePosition; }
     public get mousePosition2(): VEC2 { return this._mousePosition2; }
 
-    constructor() {
+    constructor(element?: HTMLElement | Window) {
         super();
 
+        element = element ?? window;
+
         // this._parent.addEventListener('contextmenu', this._onContextMenu.bind(this));
-        window.addEventListener('keydown', this._onKeyDown.bind(this) as EventListener);
-        window.addEventListener('keyup', this._onKeyUp.bind(this) as EventListener);
-        window.addEventListener('mousedown', this._onMouseButtonDown.bind(this) as EventListener);
-        window.addEventListener('mouseup', this._onMouseButtonUp.bind(this) as EventListener);
-        window.addEventListener('mousemove', this._onMouseMove.bind(this) as EventListener);
-        window.addEventListener('wheel', this._onWheel.bind(this) as EventListener);
+        element.addEventListener('keydown', this._onKeyDown.bind(this) as EventListener);
+        element.addEventListener('keyup', this._onKeyUp.bind(this) as EventListener);
+        element.addEventListener('pointerdown', this._onMouseButtonDown.bind(this) as EventListener);
+        element.addEventListener('pointercancel', this._onMouseButtonUp.bind(this) as EventListener);
+        element.addEventListener('pointermove', this._onMouseMove.bind(this) as EventListener);
+        element.addEventListener('wheel', this._onWheel.bind(this) as EventListener);
     }
 
     private _getCommonEventProps(ev: KeyboardEvent | MouseEvent | WheelEvent): CommonEventProps {
