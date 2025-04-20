@@ -1,6 +1,8 @@
 node_modules
-.git
 dist
+Dockerfile
+.dockerignore
+.git
 .nyc_output
 .nyc_report
 .DS_Store

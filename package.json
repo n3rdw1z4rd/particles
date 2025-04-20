@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "docker-clean": "docker images | grep particles | awk '{print $3}' | xargs docker rmi",
     "docker-build": "docker build -t particles .",
-    "docker-run": "docker run -d -p 4000:4000 --restart unless-stopped --name particles particles",
+    "docker-run": "docker run -d -p 4000:80 --restart unless-stopped --name particles particles",
     "docker-update":"docker rm -f particles && npm run docker-clean && npm run docker-build && npm run docker-run"
   },
   "keywords": [],
