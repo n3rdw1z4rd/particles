@@ -2,7 +2,7 @@ import { ClockStats } from './clock-stats';
 
 export class Clock {
     private _lastFrameTime: number = 0;
-    private _daltaTimeMilliseconds: number = 0;
+    private _deltaTimeMilliseconds: number = 0;
     private _deltaTimeSeconds: number = 0;
     private _avgDeltaTime: number = 0;
     private _frameCount: number = 0;
@@ -18,7 +18,7 @@ export class Clock {
     get fps(): number { return this._fps; }
     get frames(): number { return this._frameCountTotal; }
     get deltaTimeSeconds(): number { return this._deltaTimeSeconds; }
-    get deltaTimeMilliseconds(): number { return this._daltaTimeMilliseconds; }
+    get deltaTimeMilliseconds(): number { return this._deltaTimeMilliseconds; }
     get avgDeltaTime(): number { return this._avgDeltaTime; }
     get time(): number { return this._lastFrameTime; }
     get isRunning(): boolean { return this._isRunning; }
@@ -38,9 +38,9 @@ export class Clock {
         }
     }
 
-    public update(time: number) {
-        this._daltaTimeMilliseconds = time - this._lastFrameTime;
-        this._deltaTimeSeconds = this._daltaTimeMilliseconds / 1000;
+    public update(time: number): number {
+        this._deltaTimeMilliseconds = time - this._lastFrameTime;
+        this._deltaTimeSeconds = this._deltaTimeMilliseconds / 1000;
         this._lastFrameTime = time;
 
         if (this._frameTime + 1000 >= time) {
@@ -53,7 +53,9 @@ export class Clock {
 
         this._frameCountTotal++;
 
-        this._avgDeltaTime = (this._avgDeltaTime * this._frameCount + this._daltaTimeMilliseconds) / (this._frameCount + 1);
+        this._avgDeltaTime = (this._avgDeltaTime * this._frameCount + this._deltaTimeMilliseconds) / (this._frameCount + 1);
+
+        return this._deltaTimeSeconds;
     }
 
     public run(callback: (deltaTime: number) => void) {

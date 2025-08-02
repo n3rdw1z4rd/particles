@@ -16,12 +16,13 @@
     "author": "@n3rdw1z4rd",
     "license": "MIT",
     "devDependencies": {
-        "@types/node": "^22.14.1",
-        "@types/three": "^0.175.0",
+        "@types/node": "^24.1.0",
+        "@types/three": "^0.178.1",
+        "@vitejs/plugin-basic-ssl": "^2.1.0",
         "typescript": "^5.8.3",
         "vite": "^6.3.2"
     },
     "dependencies": {
-        "three": "^0.175.0"
+        "three": "^0.179.1"
     }
 }
