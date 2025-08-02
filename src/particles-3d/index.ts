@@ -1,3 +1,4 @@
+import { VRButton } from 'three/examples/jsm/Addons.js';
 import { rng } from '../utils/rng';
 import { ThreeJsBoilerPlate } from '../utils/three/threejs-boiler-plate';
 import { ParticleSystem } from './particle-system-3d';
@@ -7,16 +8,27 @@ export function StartParticleSystem3d(root: HTMLElement) {
         parentElement: root,
         setupBasicSceneParams: {
             gridHelper: false,
-            cameraDistance: 2,
+            cameraDistance: 0,
         },
     });
 
-    eng.cameraRig.minCameraDistance = 0.0;
+    eng.cameraRig.minCameraDistance = 0;
+    eng.cameraRig.wheelSensitivity = 0.001;
+
+    eng.renderer.xr.enabled = true;
+
+    eng.renderer.xr.addEventListener('sessionstart', () => {
+        eng.cameraRig.position.y -= 1;
+        eng.cameraRig.position.z += 1;
+    });
+
+    VRButton.createButton(eng.renderer);
 
     const ps = new ParticleSystem();
     eng.scene.add(ps);
 
-    eng.clock.run((dt: number) => {
+    eng.renderer.setAnimationLoop((t: number) => {
+        const dt = eng.clock.update(t);
         eng.resize();
 
         ps.update(eng.camera, dt);
