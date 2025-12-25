@@ -33,7 +33,7 @@ export class Input extends Emitter {
         element.addEventListener('keydown', this._onKeyDown.bind(this) as EventListener);
         element.addEventListener('keyup', this._onKeyUp.bind(this) as EventListener);
         element.addEventListener('pointerdown', this._onMouseButtonDown.bind(this) as EventListener);
-        element.addEventListener('pointercancel', this._onMouseButtonUp.bind(this) as EventListener);
+        element.addEventListener('pointerup', this._onMouseButtonUp.bind(this) as EventListener);
         element.addEventListener('pointermove', this._onMouseMove.bind(this) as EventListener);
         element.addEventListener('wheel', this._onWheel.bind(this) as EventListener);
     }
