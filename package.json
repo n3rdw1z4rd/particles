@@ -7,14 +7,10 @@
         "dev": "vite",
         "build": "tsc && vite build",
         "preview": "vite preview",
-        "docker-clean": "docker images | grep particles | awk '{print $3}' | xargs docker rmi",
-        "docker-build": "docker build -t particles .",
-        "docker-run": "docker run -d -p 4000:80 --restart unless-stopped --name particles particles",
-        "docker-update": "docker rm -f particles && npm run docker-clean && npm run docker-build && npm run docker-run",
-        "podman-clean": "podman images | grep particles | awk '{print $3}' | xargs -r podman rmi",
-	"podman-build": "sudo podman build -t particles .",
-	"podman-run": "sudo podman run -d -p 4000:80 --name particles particles",
-	"podman-update": "sudo podman rm -f particles && npm run podman-build && npm run podman-run"
+        "podman-clean": "sudo podman rm -f particles && sudo podman images | grep particles | awk '{print $3}' | xargs -r sudo podman rmi",
+        "podman-build": "sudo podman build -t particles .",
+        "podman-run": "sudo podman run -d -p 4000:80 --restart unless-stopped --name particles particles",
+        "podman-update": "npm run podman-clean && npm run podman-build && npm run podman-run"
     },
     "keywords": [],
     "author": "@n3rdw1z4rd",
