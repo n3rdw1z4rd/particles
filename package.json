@@ -9,7 +9,7 @@
         "preview": "vite preview",
         "podman-clean": "sudo podman rm -f particles && sudo podman images | grep particles | awk '{print $3}' | xargs -r sudo podman rmi",
         "podman-build": "sudo podman build -t particles .",
-        "podman-run": "sudo podman run -d -p 4000:80 --restart unless-stopped --name particles particles",
+        "podman-run": "sudo podman run -d -p 4000:80 --restart always --name particles particles",
         "podman-update": "npm run podman-clean && npm run podman-build && npm run podman-run"
     },
     "keywords": [],
