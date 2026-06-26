@@ -57,19 +57,6 @@ npm install
 npm run dev
 ```
 
-## Containerized deployment
-
-A multi-stage build compiles the app in a Node image, then serves the static `/dist` output from **nginx:alpine**. Convenience scripts wrap **Podman**:
-
-```bash
-npm run podman-build    # build the image
-npm run podman-run      # run it, mapping host :4000 -> container :80
-npm run podman-clean    # stop/remove the container and image
-npm run podman-update   # clean + build + run in one shot
-```
-
-Then visit `http://localhost:4000`. (The scripts use `podman` — swap in `docker` if that's your runtime.)
-
 ## Project structure
 
 ```
@@ -95,7 +82,7 @@ src/
 
 ## Background
 
-This is part of a long-running personal collection of from-scratch graphics and simulation experiments. The shared `utils/` engine (RNG, renderer, Three.js boilerplate, math helpers) has been built up and refined across many such projects over the years.
+This is part of a long-running personal collection of from-scratch graphics and simulation experiments. The shared `utils/` source (RNG, renderer, Three.js boilerplate, math helpers) has been built up and refined across many such projects over the years.
 
 ---
 
