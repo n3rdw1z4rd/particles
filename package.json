@@ -6,28 +6,20 @@
     "scripts": {
         "dev": "vite",
         "build": "tsc && vite build",
-        "preview": "vite preview",
-        "podman-clean": "sudo podman rm -f particles && sudo podman images | grep particles | awk '{print $3}' | xargs -r sudo podman rmi",
-        "podman-build": "sudo podman build -t particles .",
-        "podman-run": "sudo podman run -d -p 4000:80 --restart always --name particles particles",
-        "podman-update": "npm run podman-clean && npm run podman-build && npm run podman-run"
+        "preview": "vite preview"
     },
     "keywords": [],
     "author": "@n3rdw1z4rd",
     "license": "MIT",
-    "service": {
-        "port": 4000,
-        "host": "127.0.0.1"
-    },
     "devDependencies": {
-        "@types/node": "^26.0.0",
-        "@types/three": "^0.184.1",
+        "@types/node": "^26.0.1",
+        "@types/three": "^0.185.0",
         "@vitejs/plugin-basic-ssl": "^2.3.0",
         "typescript": "^6.0.3",
-        "vite": "^8.0.16"
+        "vite": "^8.1.0"
     },
     "dependencies": {
-        "three": "^0.184.0"
+        "three": "^0.185.0"
     },
     "allowScripts": {
         "fsevents@2.3.3": true

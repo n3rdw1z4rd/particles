@@ -4,6 +4,8 @@ An emergent **particle-life** simulation written from scratch in TypeScript. Tho
 
 Runs in **2D** on a canvas renderer and in **3D** with full **WebXR (VR) support** — put on a headset and stand inside the simulation!
 
+### [Live Demo](https://particles.n3rdw1z4rd.io)
+
 ## What's going on here
 
 Every particle belongs to one of several color types. A single N×N **attraction matrix** defines how each type feels about every other type: positive values attract, negative values repel. That one matrix is the entire "DNA" of the system. From those simple pairwise forces, complex collective behavior emerges — the same principle behind flocking, chemistry, and cellular self-organization.
@@ -37,7 +39,7 @@ You can also drive it directly with URL parameters:
 | `t`    | `2d` / `3d`| Which engine to launch (default `2d`)    |
 | `seed` | integer    | Seeds the RNG for a reproducible world   |
 
-Example: `?t=3d&seed=12345`
+Example: `?seed=42`
 
 ## Tech stack
 
@@ -53,15 +55,6 @@ Example: `?t=3d&seed=12345`
 ```bash
 npm install
 npm run dev
-```
-
-The dev server runs over **HTTPS** (via `@vitejs/plugin-basic-ssl`) — that's intentional, since WebXR requires a secure context. Open the URL Vite prints, and for VR open the `?t=3d` build on a WebXR-capable headset/browser and click **Enter VR**. (You'll need to accept the self-signed cert on first load.)
-
-Other scripts:
-
-```bash
-npm run build      # type-check (tsc) + production build to /dist
-npm run preview    # serve the production build locally
 ```
 
 ## Containerized deployment

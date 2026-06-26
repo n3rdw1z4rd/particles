@@ -1,9 +1,0 @@
-node_modules
-dist
-Dockerfile
-.dockerignore
-.git
-.nyc_output
-.nyc_report
-.DS_Store
-
