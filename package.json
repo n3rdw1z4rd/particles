@@ -20,7 +20,7 @@
         "host": "127.0.0.1"
     },
     "devDependencies": {
-        "@types/node": "^25.9.3",
+        "@types/node": "^26.0.0",
         "@types/three": "^0.184.1",
         "@vitejs/plugin-basic-ssl": "^2.3.0",
         "typescript": "^6.0.3",
@@ -28,5 +28,8 @@
     },
     "dependencies": {
         "three": "^0.184.0"
+    },
+    "allowScripts": {
+        "fsevents@2.3.3": true
     }
 }
