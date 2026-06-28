@@ -40,7 +40,7 @@ const Colors = [
     // [0, 1, 1, 1], // cyan
 ];
 
-export class ParticleSystem extends Group {
+export class ParticleSystem3d extends Group {
     public readonly particleCount = 1000;
 
     private _geometry: BufferGeometry;
@@ -231,10 +231,31 @@ export class ParticleSystem extends Group {
         this._geometry.attributes.position.needsUpdate = true;
     }
 
-    public update(camera: PerspectiveCamera, dt: number) {
+    /**
+     * Advance the simulation by exactly `dt`. Physics only — no sorting or
+     * geometry rebuild. Call with a FIXED dt from the accumulator loop.
+     */
+    public step(dt: number) {
         this._updateVelocities(dt);
         this._updatePositions(dt);
+    }
+
+    /**
+     * Render-side work: depth-sort the particles for the current camera and
+     * rebuild the geometry buffers. Call once per display frame after stepping,
+     * so we don't rebuild geometry on intermediate physics sub-steps.
+     */
+    public draw(camera: PerspectiveCamera) {
         this._sortParticles(camera);
         this._updateGeometry();
+    }
+
+    /**
+     * Backwards-compatible convenience: a single variable-dt step followed by a
+     * draw. Prefer the fixed-timestep `step()` + `draw()` loop for determinism.
+     */
+    public update(camera: PerspectiveCamera, dt: number) {
+        this.step(dt);
+        this.draw(camera);
     }
 }

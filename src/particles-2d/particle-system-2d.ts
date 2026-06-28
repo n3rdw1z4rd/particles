@@ -120,7 +120,7 @@ export class ParticleSystem2d {
         }
     };
 
-    private _updatePositions(deltaTimeSeconds: number, renderer: Renderer) {
+    private _updatePositions(deltaTimeSeconds: number) {
         for (let i = 0; i < this.particleCount; i++) {
             const particle = this._particles[i];
             const oldCell = this._spatialPartition.getCell(particle.x, particle.y);
@@ -134,13 +134,6 @@ export class ParticleSystem2d {
             if (particle.y < 0) particle.y = 1 + (particle.y % 1);
             if (particle.y > 1) particle.y = particle.y % 1;
 
-            renderer.setPixel(
-                particle.x * renderer.width,
-                particle.y * renderer.height,
-                colors[particle.color],
-                this._particleSize,
-            );
-
             const newCell = this._spatialPartition.getCell(particle.x, particle.y);
 
             if (newCell !== oldCell) {
@@ -153,8 +146,40 @@ export class ParticleSystem2d {
         }
     };
 
+    /**
+     * Advance the simulation by exactly `deltaTimeSeconds`. Physics only — no
+     * drawing. Call this with a FIXED dt from the accumulator loop so a given
+     * seed evolves identically regardless of display refresh rate.
+     */
+    public step(deltaTimeSeconds: number) {
+        this._updateVelocities(deltaTimeSeconds);
+        this._updatePositions(deltaTimeSeconds);
+    }
+
+    /**
+     * Paint the current particle state to the renderer. Render only — no
+     * physics. Call once per display frame, after stepping. Decoupling draw
+     * from step prevents smearing (multiple paints per frame) and flicker
+     * (zero-step frames on high-refresh displays).
+     */
+    public draw(renderer: Renderer) {
+        for (let i = 0; i < this.particleCount; i++) {
+            const particle = this._particles[i];
+            renderer.setPixel(
+                particle.x * renderer.width,
+                particle.y * renderer.height,
+                colors[particle.color],
+                this._particleSize,
+            );
+        }
+    }
+
+    /**
+     * Backwards-compatible convenience: a single variable-dt step followed by a
+     * draw. Prefer the fixed-timestep `step()` + `draw()` loop for determinism.
+     */
     public update(renderer: Renderer, dt: number) {
-        this._updateVelocities(dt);
-        this._updatePositions(dt, renderer);
+        this.step(dt);
+        this.draw(renderer);
     }
 }
