@@ -19,5 +19,9 @@
     },
     "dependencies": {
         "three": "^0.185.0"
+    },
+    "//allowScripts": "see https://github.com/orgs/community/discussions/198547",
+    "allowScripts": {
+        "fsevents@2.3.3": true
     }
 }
