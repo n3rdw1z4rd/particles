@@ -1,5 +1,6 @@
 import { BufferGeometry, Float32BufferAttribute, Group, PerspectiveCamera, Points, ShaderMaterial, Vector3 } from 'three';
 import { rng } from '../utils/rng';
+import { abs, pow, hypot3 } from '../utils/math';
 import { SpatialPartition3d, SpatialPartitionEntity3d } from './spatial-partition-3d';
 
 const vertexShader = `
@@ -102,17 +103,14 @@ export class ParticleSystem3d extends Group {
         if (r < beta) {
             f = r / beta - 1;
         } else if (beta < r && r < 1) {
-            f = a * (1 - Math.abs(2 * r - 1 - beta) / (1 - beta));
+            f = a * (1 - abs(2 * r - 1 - beta) / (1 - beta));
         }
 
         return f;
     }
 
     private _updateVelocities(dt: number) {
-        const frictionFactor: number = Math.pow(
-            0.5,
-            dt / this._frictionHalfLife,
-        );
+        const frictionFactor: number = pow(0.5, dt / this._frictionHalfLife);
 
         for (let z = 0; z < this._spatialPartition.cells.length; z++) {
             for (let y = 0; y < this._spatialPartition.cells[z].length; y++) {
@@ -133,11 +131,11 @@ export class ParticleSystem3d extends Group {
                                 let dy = p2.y - p1.y;
                                 let dz = p2.z - p1.z;
 
-                                if (Math.abs(dx) > 0.5) dx = dx > 0 ? dx - 1 : dx + 1;
-                                if (Math.abs(dy) > 0.5) dy = dy > 0 ? dy - 1 : dy + 1;
-                                if (Math.abs(dz) > 0.5) dz = dz > 0 ? dz - 1 : dz + 1;
+                                if (abs(dx) > 0.5) dx = dx > 0 ? dx - 1 : dx + 1;
+                                if (abs(dy) > 0.5) dy = dy > 0 ? dy - 1 : dy + 1;
+                                if (abs(dz) > 0.5) dz = dz > 0 ? dz - 1 : dz + 1;
 
-                                const dist = Math.hypot(dx, dy, dz);
+                                const dist = hypot3(dx, dy, dz);
 
                                 if (dist > 0 && dist < this._range) {
                                     const f = this._calcForce(dist / this._range, this._attractionMatrix[p1.color][p2.color]);
