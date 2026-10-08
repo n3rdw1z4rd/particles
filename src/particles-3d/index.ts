@@ -1,7 +1,10 @@
 import { VRButton } from 'three/examples/jsm/Addons.js';
 import { rng } from '../utils/rng';
 import { ThreeJsBoilerPlate } from '../utils/three/threejs-boiler-plate';
-import { ParticleSystem } from './particle-system-3d';
+import { ParticleSystem3d } from './particle-system-3d';
+
+const FIXED_DT = 1 / 60;
+const MAX_FRAME_DT = 0.25;
 
 export function StartParticleSystem3d(root: HTMLElement) {
     const eng = new ThreeJsBoilerPlate({
@@ -24,14 +27,23 @@ export function StartParticleSystem3d(root: HTMLElement) {
 
     VRButton.createButton(eng.renderer);
 
-    const ps = new ParticleSystem();
+    const ps = new ParticleSystem3d();
     eng.scene.add(ps);
 
+    let accumulator = 0;
+
     eng.renderer.setAnimationLoop((t: number) => {
-        const dt = eng.clock.update(t);
+        const frameDt = eng.clock.update(t);
         eng.resize();
 
-        ps.update(eng.camera, dt);
+        accumulator += Math.min(frameDt, MAX_FRAME_DT);
+
+        while (accumulator >= FIXED_DT) {
+            ps.step(FIXED_DT);
+            accumulator -= FIXED_DT;
+        }
+
+        ps.draw(eng.camera);
 
         eng.renderer.render(eng.scene, eng.camera);
 

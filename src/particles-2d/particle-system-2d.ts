@@ -1,6 +1,7 @@
 import { Color } from '../utils/color';
 import { Renderer } from '../utils/renderer';
 import { rng } from '../utils/rng';
+import { abs, pow, hypot2 } from '../utils/math';
 import { SpatialPartition2d, SpatialPartitionEntity2d } from './spatial-partition-2d';
 
 interface Particle extends SpatialPartitionEntity2d {
@@ -55,17 +56,14 @@ export class ParticleSystem2d {
         if (r < beta) {
             f = r / beta - 1;
         } else if (beta < r && r < 1) {
-            f = a * (1 - Math.abs(2 * r - 1 - beta) / (1 - beta));
+            f = a * (1 - abs(2 * r - 1 - beta) / (1 - beta));
         }
 
         return f;
     };
 
     private _updateVelocities(deltaTimeSeconds: number) {
-        const frictionFactor: number = Math.pow(
-            0.5,
-            deltaTimeSeconds / this._frictionHalfLife,
-        );
+        const frictionFactor: number = pow(0.5, deltaTimeSeconds / this._frictionHalfLife);
 
         for (let y = 0; y < this._spatialPartition.cells.length; y++) {
             for (let x = 0; x < this._spatialPartition.cells[y].length; x++) {
@@ -76,11 +74,8 @@ export class ParticleSystem2d {
                     let fy: number = 0;
 
                     const p1: Particle = cell[i] as Particle;
-
-                    // Get neighboring cells
                     const neighborCells = this._spatialPartition.getCellNeighbors(x, y);
 
-                    // Check particles in the same and neighboring cells
                     for (const neighborCell of neighborCells) {
                         for (let j = 0; j < neighborCell.length; j++) {
                             if (cell === neighborCell && i === j) continue;
@@ -88,12 +83,12 @@ export class ParticleSystem2d {
                             const p2: Particle = neighborCell[j] as Particle;
 
                             let rx: number = p2.x - p1.x;
-                            if (Math.abs(rx) > 0.5) rx = rx > 0 ? rx - 1 : rx + 1;
+                            if (abs(rx) > 0.5) rx = rx > 0 ? rx - 1 : rx + 1;
 
                             let ry: number = p2.y - p1.y;
-                            if (Math.abs(ry) > 0.5) ry = ry > 0 ? ry - 1 : ry + 1;
+                            if (abs(ry) > 0.5) ry = ry > 0 ? ry - 1 : ry + 1;
 
-                            const d: number = Math.hypot(rx, ry);
+                            const d: number = hypot2(rx, ry);
 
                             if (d > 0 && d < this._range) {
                                 const f: number = this._calcForce(
@@ -120,7 +115,7 @@ export class ParticleSystem2d {
         }
     };
 
-    private _updatePositions(deltaTimeSeconds: number, renderer: Renderer) {
+    private _updatePositions(deltaTimeSeconds: number) {
         for (let i = 0; i < this.particleCount; i++) {
             const particle = this._particles[i];
             const oldCell = this._spatialPartition.getCell(particle.x, particle.y);
@@ -134,13 +129,6 @@ export class ParticleSystem2d {
             if (particle.y < 0) particle.y = 1 + (particle.y % 1);
             if (particle.y > 1) particle.y = particle.y % 1;
 
-            renderer.setPixel(
-                particle.x * renderer.width,
-                particle.y * renderer.height,
-                colors[particle.color],
-                this._particleSize,
-            );
-
             const newCell = this._spatialPartition.getCell(particle.x, particle.y);
 
             if (newCell !== oldCell) {
@@ -153,8 +141,40 @@ export class ParticleSystem2d {
         }
     };
 
+    /**
+     * Advance the simulation by exactly `deltaTimeSeconds`. Physics only — no
+     * drawing. Call this with a FIXED dt from the accumulator loop so a given
+     * seed evolves identically regardless of display refresh rate.
+     */
+    public step(deltaTimeSeconds: number) {
+        this._updateVelocities(deltaTimeSeconds);
+        this._updatePositions(deltaTimeSeconds);
+    }
+
+    /**
+     * Paint the current particle state to the renderer. Render only — no
+     * physics. Call once per display frame, after stepping. Decoupling draw
+     * from step prevents smearing (multiple paints per frame) and flicker
+     * (zero-step frames on high-refresh displays).
+     */
+    public draw(renderer: Renderer) {
+        for (let i = 0; i < this.particleCount; i++) {
+            const particle = this._particles[i];
+            renderer.setPixel(
+                particle.x * renderer.width,
+                particle.y * renderer.height,
+                colors[particle.color],
+                this._particleSize,
+            );
+        }
+    }
+
+    /**
+     * Backwards-compatible convenience: a single variable-dt step followed by a
+     * draw. Prefer the fixed-timestep `step()` + `draw()` loop for determinism.
+     */
     public update(renderer: Renderer, dt: number) {
-        this._updateVelocities(dt);
-        this._updatePositions(dt, renderer);
+        this.step(dt);
+        this.draw(renderer);
     }
 }

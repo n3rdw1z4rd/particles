@@ -1,3 +1,5 @@
+import { ceil, floor } from '../utils/math';
+
 export interface SpatialPartitionEntity3d {
     x: number;
     y: number;
@@ -13,7 +15,7 @@ export class SpatialPartition3d {
         this.cellSize = cellSize;
         this.entities = entities;
 
-        const gridSize = Math.ceil(1.0 / cellSize);
+        const gridSize = ceil(1.0 / cellSize);
 
         this.cells = Array.from({ length: gridSize }, () =>
             Array.from({ length: gridSize }, () =>
@@ -27,9 +29,9 @@ export class SpatialPartition3d {
     }
 
     getCell(x: number, y: number, z: number) {
-        const cx = Math.floor(x / this.cellSize);
-        const cy = Math.floor(y / this.cellSize);
-        const cz = Math.floor(z / this.cellSize);
+        const cx = floor(x / this.cellSize);
+        const cy = floor(y / this.cellSize);
+        const cz = floor(z / this.cellSize);
 
         return this.cells[cz][cy][cx];
     }

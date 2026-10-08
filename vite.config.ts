@@ -2,11 +2,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
     build: {
-        rolldownOptions: {
-            output: {
-                codeSplitting: true,
-            },
-        },
+        chunkSizeWarningLimit: 1000,
     },
     server: {
         host: true,

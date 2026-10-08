@@ -1,5 +1,5 @@
 import { logwrn } from './logger';
-import { clamp } from './math';
+import { clamp, floor, round } from './math';
 
 export class Color {
     private _hex: string = '#ffffffff';
@@ -86,7 +86,7 @@ export class Color {
         let g: number = 0
         let b: number = 0;
 
-        let i = Math.floor(h * 6);
+        let i = floor(h * 6);
         let f = h * 6 - i;
         let p = v * (1 - s);
         let q = v * (1 - f * s);
@@ -101,7 +101,7 @@ export class Color {
             case 5: r = v, g = p, b = q; break;
         }
 
-        return new Color(Math.round(r * 255), Math.round(g * 255), Math.round(b * 255), a);
+        return new Color(round(r * 255), round(g * 255), round(b * 255), a);
     }
 
     public static get BLACK(): Color { return new Color(0, 0, 0, 255); }

@@ -1,4 +1,4 @@
-import { VEC2 } from './math';
+import { imul } from './math';
 
 export class Rng {
     private __seed: number;
@@ -34,9 +34,9 @@ export class Rng {
         this._seed = (this._seed + 0x9e3779b9) | 0;
 
         let t: number = this._seed ^ (this._seed >>> 16);
-        t = Math.imul(t, 0x21f0aaad);
+        t = imul(t, 0x21f0aaad);
         t = t ^ (t >>> 15);
-        t = Math.imul(t, 0x735a2d97);
+        t = imul(t, 0x735a2d97);
 
         return ((t = t ^ (t >>> 15)) >>> 0) / 4294967296;
     }
@@ -98,11 +98,6 @@ export class Rng {
         }
 
         return rows;
-    }
-
-    public randomUnitVector(): VEC2 {
-        const theta = rng.nextf * 2 * Math.PI;
-        return [Math.cos(theta), Math.sin(theta)];
     }
 }
 

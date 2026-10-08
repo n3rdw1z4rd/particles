@@ -1,3 +1,5 @@
+import { ceil, floor } from '../utils/math';
+
 export interface SpatialPartitionEntity2d {
     x: number;
     y: number;
@@ -12,8 +14,8 @@ export class SpatialPartition2d {
         this.cellSize = cellSize;
         this.entities = entities;
 
-        this.cells = Array.from({ length: Math.ceil(1.0 / cellSize) }, () =>
-            Array.from({ length: Math.ceil(1.0 / cellSize) }, () => [])
+        this.cells = Array.from({ length: ceil(1.0 / cellSize) }, () =>
+            Array.from({ length: ceil(1.0 / cellSize) }, () => [])
         );
 
         for (const entity of this.entities) {
@@ -27,8 +29,8 @@ export class SpatialPartition2d {
     }
 
     getCell(x: number, y: number) {
-        const cellX = Math.floor(x / this.cellSize);
-        const cellY = Math.floor(y / this.cellSize);
+        const cellX = floor(x / this.cellSize);
+        const cellY = floor(y / this.cellSize);
         return this.cells[cellY][cellX];
     }
 
