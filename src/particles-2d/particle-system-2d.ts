@@ -74,11 +74,8 @@ export class ParticleSystem2d {
                     let fy: number = 0;
 
                     const p1: Particle = cell[i] as Particle;
-
-                    // Get neighboring cells
                     const neighborCells = this._spatialPartition.getCellNeighbors(x, y);
 
-                    // Check particles in the same and neighboring cells
                     for (const neighborCell of neighborCells) {
                         for (let j = 0; j < neighborCell.length; j++) {
                             if (cell === neighborCell && i === j) continue;

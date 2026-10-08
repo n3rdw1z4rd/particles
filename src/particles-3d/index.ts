@@ -3,9 +3,8 @@ import { rng } from '../utils/rng';
 import { ThreeJsBoilerPlate } from '../utils/three/threejs-boiler-plate';
 import { ParticleSystem3d } from './particle-system-3d';
 
-// Fixed physics heartbeat — see particles-2d/index.ts for the rationale.
-const FIXED_DT = 1 / 60;   // seconds per physics step
-const MAX_FRAME_DT = 0.25; // clamp giant gaps to avoid a step spiral
+const FIXED_DT = 1 / 60;
+const MAX_FRAME_DT = 0.25;
 
 export function StartParticleSystem3d(root: HTMLElement) {
     const eng = new ThreeJsBoilerPlate({
@@ -44,8 +43,6 @@ export function StartParticleSystem3d(root: HTMLElement) {
             accumulator -= FIXED_DT;
         }
 
-        // Sort + rebuild geometry once per display frame, against the final
-        // stepped state and the current camera.
         ps.draw(eng.camera);
 
         eng.renderer.render(eng.scene, eng.camera);
