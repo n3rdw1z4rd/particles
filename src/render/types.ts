@@ -14,6 +14,8 @@ export interface SimRenderer {
     start(frame: (dt: number) => void): void;
     render(sim: Simulation, view: ViewOptions): void;
     dispose(): void;
+    /** Starts or ends an immersive VR session (3D only). */
+    enterVR?(): Promise<void>;
 }
 
 export function hexToRgb(hex: string): [number, number, number] {

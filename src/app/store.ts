@@ -1,4 +1,4 @@
-import { Signal } from '@n3rdw1z4rd/smoke-ui';
+import { computed, Signal } from '@n3rdw1z4rd/smoke-ui';
 import { compileScript, describeError, ScriptHooks } from '../core/script';
 import { Simulation } from '../core/simulation';
 import {
@@ -29,6 +29,15 @@ export const showBounds = new Signal(true);
 export const paused = new Signal(false);
 
 export const fps = new Signal(0);
+
+/** True when this browser can enter immersive VR. */
+export const vrAvailable = new Signal(false);
+/** The VR entry point lives on the 3D renderer, so it's only offered in 3D. */
+export const vrReady = computed(() => vrAvailable.get() && dims.get() === 3);
+
+navigator.xr?.isSessionSupported('immersive-vr')
+    .then((ok) => vrAvailable.set(ok))
+    .catch(() => { /* no XR */ });
 export const simTime = new Signal('0.0');
 
 export type ScriptState =
@@ -365,6 +374,22 @@ export async function shareLink(): Promise<void> {
     } catch {
         toast('Link is in the address bar');
     }
+}
+
+/** Starts (or ends) an immersive VR session; must be called from a user gesture. */
+export function enterVR(): void {
+    renderer?.enterVR?.().catch((err) => toast(`Couldn't start VR: ${describeError(err)}`, true));
+}
+
+export function pickAndImportJson(): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json,.json';
+    input.onchange = () => {
+        const file = input.files?.[0];
+        if (file) void importJson(file);
+    };
+    input.click();
 }
 
 export function exportJson(): void {
