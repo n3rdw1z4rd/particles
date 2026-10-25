@@ -1,30 +1,12 @@
 @import './utils/css/reset.css';
 
 :root {
-    /* Colors */
     --color-foreground: lightgray;
     --color-background: #111;
-    --color-border: #444;
-
-    /* Common Variables */
-    --border-width: 1px;
-    --border-radius: 4px;
-    --padding-small: 4px;
-    --padding-medium: 8px;
-    --padding-large: 16px;
-    --margin-small: 4px;
-    --margin-medium: 8px;
-    --margin-large: 16px;
-    --border-style: var(--border-width) dashed var(--color-border);
-
-    /* Transparency Levels */
-    --background-opacity-light: rgba(0, 0, 0, 0.1);
-    --background-opacity-medium: rgba(0, 0, 0, 0.5);
-    --background-opacity-dark: rgba(0, 0, 0, 0.8);
-}
-
-* {
-    font: 18px monospace;
+    --panel-width: 300px;
+    --ok: #3fd1a4;
+    --warn: #f0b429;
+    --err: #ff5d73;
 }
 
 html {
@@ -33,25 +15,342 @@ html {
     width: 100%;
     height: 100%;
     overflow: hidden;
+    font: 12px ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 }
 
 body,
 #root {
+    position: relative;
     width: 100%;
     height: 100%;
     margin: 0;
     padding: 0;
 }
 
-#button-container {
+.sim-canvas {
     position: absolute;
-    bottom: 4px;
-    right: 4px;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+}
+
+/* ── control panel ─────────────────────────────────────────────── */
+
+.control-panel {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    max-height: calc(100% - 16px);
+    width: var(--panel-width);
+    max-width: calc(100vw - 16px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    border-radius: 6px;
+    z-index: 2;
+}
+
+.control-panel .smoke-panel {
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--smoke-border);
+}
+
+.control-panel .smoke-panel > h3 {
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+}
+
+.section {
+    border-top: 1px solid var(--smoke-border);
+    padding: 6px 0;
+}
+
+.section > summary {
+    cursor: pointer;
+    user-select: none;
+    color: var(--smoke-fg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 11px;
+    padding: 2px 0 6px;
+    list-style: none;
+}
+
+.section > summary::-webkit-details-marker { display: none; }
+.section > summary::before { content: '▸ '; }
+.section[open] > summary::before { content: '▾ '; }
+
+.section-body .smoke-row > span:first-child {
+    flex: 0 0 82px;
+    color: var(--smoke-fg-muted);
+}
+
+.section-body .smoke-row input[type='range'] {
+    flex: 1;
+    min-width: 0;
+}
+
+.section-body .smoke-row > span:last-child {
+    width: 48px !important;
+    font-variant-numeric: tabular-nums;
+}
+
+.row-buttons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.row-buttons.wrap { flex-wrap: wrap; }
+.spacer { flex: 1; }
+
+.btn {
+    font: inherit;
+    color: var(--smoke-fg);
+    background: var(--smoke-bg-elevated);
+    border: 1px solid var(--smoke-border);
+    border-radius: var(--smoke-radius-sm);
+    padding: 4px 8px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.btn:hover { border-color: var(--smoke-fg-muted); }
+
+.btn.primary {
+    background: var(--smoke-accent);
+    border-color: var(--smoke-accent);
+    color: #0b0b0b;
+}
+
+.btn.icon { padding: 4px 7px; }
+
+.segmented {
+    display: inline-flex;
+    border: 1px solid var(--smoke-border);
+    border-radius: var(--smoke-radius-sm);
+    overflow: hidden;
+}
+
+.seg {
+    font: inherit;
+    color: var(--smoke-fg-muted);
+    background: transparent;
+    border: 0;
+    padding: 4px 9px;
+    cursor: pointer;
+}
+
+.seg.active {
+    background: var(--smoke-accent);
+    color: #0b0b0b;
+}
+
+.seed-input {
+    font: inherit;
+    color: var(--smoke-fg);
+    background: var(--smoke-bg-elevated);
+    border: 1px solid var(--smoke-border);
+    border-radius: var(--smoke-radius-sm);
+    padding: 4px 6px;
+    width: 0;
+    flex: 1;
+    min-width: 0;
+}
+
+.species-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.species-list input[type='color'] {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 1px solid var(--smoke-border);
+    border-radius: 50%;
+    background: none;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.species-list input[type='color']::-webkit-color-swatch-wrapper { padding: 0; }
+.species-list input[type='color']::-webkit-color-swatch { border: 0; border-radius: 50%; }
+.species-list input[type='color']::-moz-color-swatch { border: 0; border-radius: 50%; }
+
+.matrix-editor { margin-bottom: 8px; }
+
+.matrix-canvas {
+    display: block;
+    width: 100%;
+    cursor: ns-resize;
+    touch-action: none;
+}
+
+.matrix-readout {
+    color: var(--smoke-fg-muted);
+    font-size: 11px;
+    min-height: 1.4em;
+    margin-top: 4px;
+}
+
+.script-pill.status-running { color: var(--ok); }
+.script-pill.status-error { color: var(--err); }
+.script-pill.status-pending { color: var(--warn); }
+.script-pill.status-off { color: var(--smoke-fg-muted); }
+
+.shortcuts {
+    border-top: 1px solid var(--smoke-border);
+    padding-top: 8px;
+    color: var(--smoke-fg-muted);
+    font-size: 10.5px;
+    line-height: 1.5;
+}
+
+/* ── overlays ──────────────────────────────────────────────────── */
+
+.stats {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    z-index: 2;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.55);
+    color: #8a8a8a;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+}
+
+.stats span { color: #d3d3d3; }
+
+.banner {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 4;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    max-width: calc(100vw - var(--panel-width) - 32px);
+    padding: 8px 10px;
+    border: 1px solid var(--warn);
+    border-radius: 6px;
+    background: rgba(30, 24, 8, 0.95);
+}
+
+.toasts {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     flex-direction: column;
+    gap: 6px;
+    z-index: 10;
+    pointer-events: none;
+}
 
-    padding: var(--padding-medium);
-    border-radius: var(--border-radius);
-    border: var(--border-style);
-    background: var(--background-opacity-medium);
+.toast {
+    padding: 6px 12px;
+    border-radius: 4px;
+    background: #222;
+    border: 1px solid #444;
+    transition: opacity 0.4s;
+}
+
+.toast-error { border-color: var(--err); }
+.toast-out { opacity: 0; }
+
+.vr-button {
+    z-index: 3 !important;
+    left: 8px !important;
+    bottom: 40px !important;
+    transform: none !important;
+}
+
+/* ── script drawer ─────────────────────────────────────────────── */
+
+.script-drawer {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    bottom: 8px;
+    width: min(680px, calc(100vw - var(--panel-width) - 32px));
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    background: #1d1f24;
+    border: 1px solid #3a3a3a;
+    border-radius: 6px;
+    overflow: hidden;
+    transform: translateX(calc(-100% - 16px));
+    transition: transform 0.2s ease;
+}
+
+.script-drawer.open { transform: none; }
+
+.script-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border-bottom: 1px solid #3a3a3a;
+}
+
+.script-header select {
+    font: inherit;
+    color: var(--smoke-fg);
+    background: var(--smoke-bg-elevated);
+    border: 1px solid var(--smoke-border);
+    border-radius: 4px;
+    padding: 3px 4px;
+}
+
+.script-host {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.script-loading {
+    padding: 12px;
+    color: var(--smoke-fg-muted);
+}
+
+.script-status {
+    margin: 0;
+    padding: 6px 10px;
+    border-top: 1px solid #3a3a3a;
+    white-space: pre-wrap;
+    font: inherit;
+    max-height: 30%;
+    overflow: auto;
+}
+
+.script-status.status-running { color: var(--ok); }
+.script-status.status-error { color: var(--err); background: rgba(255, 93, 115, 0.08); }
+.script-status.status-pending { color: var(--warn); }
+.script-status.status-off { color: var(--smoke-fg-muted); }
+
+/* ── hide UI (H) / small screens ───────────────────────────────── */
+
+.ui-hidden .control-panel,
+.ui-hidden .stats,
+.ui-hidden .script-drawer {
+    display: none;
+}
+
+@media (max-width: 720px) {
+    :root { --panel-width: 260px; }
+
+    .script-drawer {
+        width: calc(100vw - 16px);
+        z-index: 5;
+    }
 }
