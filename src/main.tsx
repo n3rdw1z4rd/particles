@@ -1,12 +1,13 @@
 import { computed } from '@n3rdw1z4rd/smoke-ui';
 import { setTheme } from '@n3rdw1z4rd/smoke-ui-components';
 import {
-    activeCount, boot, count, dims, editorOpen, fps, newWorld, simRate, resetWorld, resetAll, runScript, scriptSource,
+    activeCount, boot, count, dims, editorOpen, fps, newWorld, simRate, restartWorld, requestResetAll, runScript, scriptSource,
     scriptState, seed, setDims, simTime, step, stopScript, togglePause,
 } from './app/store';
 import * as store from './app/store';
 import { dockEdge, dockOpen, toggleDock, toggleUi, uiHidden } from './app/ui-state';
 import { ActionBar } from './ui/action-bar';
+import { ConfirmReset } from './ui/confirm-reset';
 import { Dock } from './ui/dock';
 import { ScriptEditor } from './ui/script-editor';
 
@@ -49,6 +50,7 @@ const stage = (
         <ScriptBanner />
         <ActionBar />
         <ScriptEditor />
+        <ConfirmReset />
     </main>
 ) as HTMLElement;
 
@@ -77,12 +79,13 @@ function isTyping(target: EventTarget | null): boolean {
 
 window.addEventListener('keydown', (ev) => {
     if (isTyping(ev.target) || ev.ctrlKey || ev.metaKey || ev.altKey) return;
+    if (document.querySelector('dialog[open]')) return; // a dialog owns the keyboard
 
     switch (ev.key) {
         case ' ': togglePause(); break;
         case '.': step(); break;
-        case 'r': resetWorld(); break;
-        case 'R': resetAll(); break;
+        case 'r': restartWorld(); break;
+        case 'R': requestResetAll(); break;
         case 'n': newWorld(); break;
         case 'd': setDims(dims.get() === 2 ? 3 : 2); break;
         case 'e': editorOpen.set(true); break;

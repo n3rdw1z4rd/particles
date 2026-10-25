@@ -8,7 +8,7 @@
     --err: #ff5d73;
 
     /* dock sizes */
-    --dock-side: 300px;
+    --dock-side: clamp(280px, 25%, 480px);
     --dock-tb: min(42dvh, 340px);
 
     /* touch-target size; grows on coarse pointers */
@@ -407,6 +407,7 @@ body,
 .status-error { color: var(--err); }
 .status-pending { color: var(--warn); }
 .status-off { color: var(--smoke-fg-muted); }
+.status-stopped { color: var(--err); }
 
 /* ── icons ─────────────────────────────────────────────────────── */
 
@@ -504,6 +505,12 @@ body,
 }
 
 .fab-btn:hover { background: #2a2a2a; }
+
+/* the script button shows the script's state: running, stopped / failed, waiting for review */
+.fab-btn.script-btn[data-state='running'] { color: lime; }
+.fab-btn.script-btn[data-state='stopped'],
+.fab-btn.script-btn[data-state='error'] { color: red; }
+.fab-btn.script-btn[data-state='pending'] { color: var(--warn); }
 .fab-btn .swap { display: inline-flex; }
 .fab-btn .swap.hide { display: none; }
 
@@ -541,7 +548,8 @@ body,
     position: absolute;
     top: calc(var(--inset-t) + 8px);
     left: calc(var(--inset-l) + 8px);
-    bottom: calc(var(--inset-b) + 8px);
+    /* stop above the action bar so its buttons stay reachable */
+    bottom: calc(var(--inset-b) + var(--fab) + 28px);
     width: min(680px, calc(100% - var(--inset-l) - var(--inset-r) - 16px));
     z-index: 5;
     display: flex;
@@ -567,6 +575,12 @@ body,
     gap: 6px;
     padding: 6px 8px;
     border-bottom: 1px solid #3a3a3a;
+}
+
+.script-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .script-header select {
@@ -618,4 +632,46 @@ body,
 
 @media (max-width: 720px) and (pointer: coarse) {
     .script-host .cm-content { font-size: 14px; }
+}
+
+/* ── confirm dialog ────────────────────────────────────────────── */
+
+.confirm {
+    width: min(420px, calc(100vw - 32px));
+    padding: 16px 18px;
+    color: var(--smoke-fg);
+    background: #1a1a1a;
+    border: 1px solid var(--smoke-border);
+    border-radius: 8px;
+    font: inherit;
+}
+
+.confirm::backdrop { background: rgba(0, 0, 0, 0.55); }
+
+.confirm h2 {
+    margin: 0 0 10px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.confirm p {
+    margin: 0 0 10px;
+    line-height: 1.5;
+    color: var(--smoke-fg-muted);
+}
+
+.confirm .confirm-hint { color: var(--smoke-fg); }
+
+.confirm-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+}
+
+.btn.danger {
+    background: var(--err);
+    border-color: var(--err);
+    color: #0b0b0b;
 }

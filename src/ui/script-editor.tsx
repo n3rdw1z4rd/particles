@@ -3,6 +3,7 @@ import {
     editorOpen, runningScript, runScript, scriptSource, scriptState, stopScript,
 } from '../app/store';
 import { SCRIPT_EXAMPLES } from '../core/script';
+import { Icon } from './icons';
 
 type CodeMirrorView = import('codemirror').EditorView;
 
@@ -61,6 +62,40 @@ scriptSource.subscribe((src) => {
     }
 });
 
+/**
+ * "clear": stops the script (back to the built-in physics) and puts the default
+ * template back in the editor. It throws away the editor's text, so it takes
+ * two clicks: the first arms it for a few seconds.
+ */
+function ClearButton(): HTMLElement {
+    let armed = 0;
+    const btn = (
+        <button className="btn" title="stop the script and reset the editor to the default template">clear</button>
+    ) as HTMLButtonElement;
+
+    const disarm = () => {
+        clearTimeout(armed);
+        armed = 0;
+        btn.textContent = 'clear';
+        btn.classList.remove('danger');
+    };
+
+    btn.addEventListener('click', () => {
+        if (!armed) {
+            btn.textContent = 'sure?';
+            btn.classList.add('danger');
+            armed = window.setTimeout(disarm, 3000);
+            return;
+        }
+        disarm();
+        stopScript();
+        setDoc(SCRIPT_EXAMPLES[0].source);
+    });
+
+    editorOpen.subscribe((open) => !open && armed && disarm());
+    return btn;
+}
+
 export function ScriptEditor(): HTMLElement {
     const host = <div className="script-host"><div className="script-loading">loading editor…</div></div> as HTMLElement;
 
@@ -68,10 +103,11 @@ export function ScriptEditor(): HTMLElement {
         const s = scriptState.get();
         const modified = s.kind === 'running' && scriptSource.get() !== runningScript.get();
         switch (s.kind) {
-            case 'running': return modified ? '● running (edited — Ctrl/⌘+Enter to apply)' : '● running';
+            case 'running': return modified ? '● running (edited — ctrl/⌘+enter to apply)' : '● running';
             case 'pending': return `⚠ ${s.message}`;
             case 'error': return `✖ ${s.message}`;
-            default: return '○ not running · Ctrl/⌘+Enter to run';
+            case 'stopped': return '■ stopped · ctrl/⌘+enter to run again';
+            default: return '○ not running · ctrl/⌘+enter to run';
         }
     });
     const statusClass = computed(() => `script-status status-${scriptState.get().kind}`);
@@ -79,7 +115,7 @@ export function ScriptEditor(): HTMLElement {
     const drawer = (
         <section className={computed(() => (editorOpen.get() ? 'script-drawer open' : 'script-drawer'))}>
             <header className="script-header">
-                <strong>script</strong>
+                <strong>script editor</strong>
                 <select
                     onChange={(e: Event) => {
                         const i = Number((e.target as HTMLSelectElement).value);
@@ -91,14 +127,28 @@ export function ScriptEditor(): HTMLElement {
                     {SCRIPT_EXAMPLES.map((ex, i) => <option value={String(i)}>{ex.name}</option>)}
                 </select>
                 <span className="spacer" />
-                <button className="btn primary" title="Ctrl/⌘+Enter" onClick={() => void runScript()}>▶ run</button>
-                <button className="btn" onClick={() => stopScript()}>■ stop</button>
-                <button className="btn icon" title="close (Esc)" onClick={() => editorOpen.set(false)}>✕</button>
+                <span className="script-actions">
+                    <button className="btn primary" title="run (ctrl/⌘+enter)" onClick={() => void runScript()}>▶ run</button>
+                    <button className="btn" onClick={() => stopScript(scriptState.get().kind === 'running' ? { kind: 'stopped' } : undefined)}>■ stop</button>
+                    <ClearButton />
+                    <button className="btn icon" title="close (esc)" aria-label="close (esc)" onClick={() => editorOpen.set(false)}>
+                        <Icon name="close" />
+                    </button>
+                </span>
             </header>
             {host}
             <pre className={statusClass}>{statusText}</pre>
         </section>
     ) as HTMLElement;
+
+    // Clicking anywhere outside the drawer closes it. The action bar's script
+    // button is excluded because it toggles the drawer itself.
+    document.addEventListener('pointerdown', (ev) => {
+        if (!editorOpen.get()) return;
+        const target = ev.target as Element | null;
+        if (!target || drawer.contains(target) || target.closest('.script-btn, dialog')) return;
+        editorOpen.set(false);
+    }, true);
 
     editorOpen.subscribe((open) => {
         drawer.inert = !open;
