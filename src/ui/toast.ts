@@ -4,7 +4,8 @@ export function toast(message: string, isError = false): void {
     if (!host) {
         host = document.createElement('div');
         host.className = 'toasts';
-        document.body.append(host);
+        // Inside the app shell so it can sit above the dock (uses the shell's --inset-* vars).
+        (document.querySelector('.app') ?? document.body).append(host);
     }
 
     const el = document.createElement('div');

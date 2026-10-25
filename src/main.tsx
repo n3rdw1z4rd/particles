@@ -1,11 +1,13 @@
 import { computed } from '@n3rdw1z4rd/smoke-ui';
 import { setTheme } from '@n3rdw1z4rd/smoke-ui-components';
 import {
-    boot, count, dims, editorOpen, fps, newWorld, resetWorld, resetAll, runScript, scriptSource,
+    activeCount, boot, count, dims, editorOpen, fps, newWorld, simRate, resetWorld, resetAll, runScript, scriptSource,
     scriptState, seed, setDims, simTime, step, stopScript, togglePause,
 } from './app/store';
 import * as store from './app/store';
-import { ControlPanel } from './ui/panel';
+import { dockEdge, dockOpen, toggleDock, toggleUi, uiHidden } from './app/ui-state';
+import { ActionBar } from './ui/action-bar';
+import { Dock } from './ui/dock';
 import { ScriptEditor } from './ui/script-editor';
 
 setTheme({
@@ -20,7 +22,7 @@ setTheme({
 
 const Stats = () => (
     <div className="stats">
-        <span>{fps}</span> fps · <span>{count}</span> particles · {computed(() => `${dims.get()}D`)} · seed <span>{seed}</span> · t <span>{simTime}</span>s
+        <span>{fps}</span> fps · sim <span>{simRate}</span> · <span>{computed(() => (activeCount.get() === count.get() ? String(count.get()) : `${activeCount.get()}/${count.get()}`))}</span> · {computed(() => `${dims.get()}D`)} · seed <span>{seed}</span> · t <span>{simTime}</span>s
     </div>
 );
 
@@ -28,14 +30,41 @@ const Stats = () => (
 const ScriptBanner = () => (
     <div className="banner" style={{ display: computed(() => (scriptState.get().kind === 'pending' ? '' : 'none')) }}>
         <span>This shared world includes a <b>script</b>. Scripts run as code in this page — review it first.</span>
-        <button className="btn" onClick={() => editorOpen.set(true)}>review</button>
-        <button className="btn primary" onClick={() => void runScript(scriptSource.get())}>run</button>
-        <button className="btn" onClick={() => stopScript()}>ignore</button>
+        <span className="banner-actions">
+            <button className="btn" onClick={() => editorOpen.set(true)}>review</button>
+            <button className="btn primary" onClick={() => void runScript(scriptSource.get())}>run</button>
+            <button className="btn" onClick={() => stopScript()}>ignore</button>
+        </span>
     </div>
 );
 
-const root = document.getElementById('root')!;
-root.append(<Stats />, <ScriptBanner />, <ControlPanel />, <ScriptEditor />);
+/*
+ * Layout: the stage (canvas + overlays) takes whatever space the dock leaves,
+ * so the panel never covers the simulation. `data-*` attributes on the shell
+ * drive all of the docking CSS.
+ */
+const stage = (
+    <main className="stage">
+        <Stats />
+        <ScriptBanner />
+        <ActionBar />
+        <ScriptEditor />
+    </main>
+) as HTMLElement;
+
+const app = (
+    <div
+        className="app"
+        data-edge={dockEdge}
+        data-open={computed(() => String(dockOpen.get()))}
+        data-ui-hidden={computed(() => String(uiHidden.get()))}
+    >
+        {stage}
+        <Dock />
+    </div>
+) as HTMLElement;
+
+document.getElementById('root')!.append(app);
 
 /* ------------------------------------------------------------------ */
 /* Keyboard shortcuts                                                   */
@@ -57,14 +86,17 @@ window.addEventListener('keydown', (ev) => {
         case 'n': newWorld(); break;
         case 'd': setDims(dims.get() === 2 ? 3 : 2); break;
         case 'e': editorOpen.set(true); break;
-        case 'h': document.body.classList.toggle('ui-hidden'); break;
+        case 'h': toggleUi(); break;
+        case 'p': toggleDock(); break;
         default: return;
     }
 
+    // Keep Space from also "clicking" whatever button has focus.
+    (document.activeElement as HTMLElement | null)?.blur?.();
     ev.preventDefault();
 });
 
-void boot(root);
+void boot(stage);
 
 // Console access for live tinkering: `particles.sim.set(0, 1, 0.5)`, `particles.store.newWorld()`, …
 (window as any).particles = {

@@ -68,7 +68,7 @@ const API_DOC = `// ── Particle script ────────────�
 //   sim.get(a, b), sim.set(a, b, v)   attraction matrix (UI stays in sync)
 //   sim.params          { range, frictionHalfLife, forceScale, beta, timeScale }
 //   sim.pointer         { x, y, down, active } in world space (2D only)
-//   sim.rng.nextf       seeded random in [0, 1)
+//   sim.rng.nextFloat() seeded random in [0, 1)
 // ─────────────────────────────────────────────────────────────────
 `;
 

@@ -2,10 +2,12 @@ import {
     BoxGeometry, BufferAttribute, BufferGeometry, EdgesGeometry, Group, LineBasicMaterial,
     LineSegments, Points, Scene, ShaderMaterial, Vector2, WebGLRenderer,
 } from 'three';
-import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
-import type { Simulation } from '../core/simulation';
-import { ThreeJsCameraRig } from '../utils/three/threejs-camera-rig';
+import type { SimView } from '../sim/sim-client';
+import { GestureRecognizer } from '@n3rdw1z4rd/core';
+import { CameraRig } from '@n3rdw1z4rd/core/three';
 import { hexToRgb, SimRenderer, ViewOptions } from './types';
+
+const DEFAULT_DISTANCE = 1.6;
 
 const vertexShader = /* glsl */ `
 uniform float pointSize;
@@ -35,7 +37,7 @@ void main() {
 export class Renderer3d implements SimRenderer {
     readonly renderer: WebGLRenderer;
     readonly scene = new Scene();
-    readonly rig = new ThreeJsCameraRig({ fov: 75, near: 0.01, far: 100 });
+    readonly rig = new CameraRig({ fov: 75, near: 0.01, far: 100, distance: DEFAULT_DISTANCE });
 
     private _world = new Group();
     private _geometry = new BufferGeometry();
@@ -43,8 +45,8 @@ export class Renderer3d implements SimRenderer {
     private _bounds: LineSegments;
     private _capacity = 0;
     private _last = 0;
-    private _vrButton: HTMLElement | null = null;
-    private _disposed = false;
+    private _lastRender = 0;
+    private _gestures = new GestureRecognizer();
     private _size = new Vector2();
     private _cleanup: (() => void)[] = [];
 
@@ -59,10 +61,13 @@ export class Renderer3d implements SimRenderer {
         parent.prepend(this.canvas);
 
         this.scene.add(this.rig);
-        this.rig.camera.position.z = 1.6;
-        this.rig.minCameraDistance = 0;
-        this.rig.maxCameraDistance = 6;
-        this.rig.wheelSensitivity = 0.001;
+        // Orbit the cube's centre; no first-person mode, full pitch range.
+        this.rig.minDistance = 0.05;
+        this.rig.maxDistance = 6;
+        this.rig.distance = DEFAULT_DISTANCE;
+        this.rig.orbitSensitivity = 0.01;
+        this.rig.pitchLimits = { min: -Math.PI / 2 + 0.01, max: Math.PI / 2 - 0.01 };
+        this.rig.targetOffset.set(0, 0, 0);
 
         this._world.position.set(-0.5, -0.5, -0.5);
         this.scene.add(this._world);
@@ -91,24 +96,40 @@ export class Renderer3d implements SimRenderer {
         this._setupXR();
     }
 
+    /** Puts the camera back where it starts. */
+    resetCamera(): void {
+        this.rig.yaw = 0;
+        this.rig.pitch = 0;
+        this.rig.distance = DEFAULT_DISTANCE;
+    }
+
     private _bindControls(): void {
         // Listen on the canvas only, so dragging UI sliders never orbits the camera.
-        let dragging = false;
-        let lx = 0, ly = 0;
+        // One pointer orbits; two pointers pinch-zoom (the GestureRecognizer tracks the pair);
+        // double-tap / double-click resets the camera.
+        const pointers = new Map<number, { x: number; y: number }>();
 
         const down = (ev: PointerEvent) => {
-            dragging = true;
-            lx = ev.clientX;
-            ly = ev.clientY;
+            pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+            this._gestures.down(ev.pointerId, ev.clientX, ev.clientY, ev.timeStamp);
             this.canvas.setPointerCapture(ev.pointerId);
         };
         const move = (ev: PointerEvent) => {
-            if (!dragging) return;
-            this.rig.orbit(ev.clientX - lx, ev.clientY - ly);
-            lx = ev.clientX;
-            ly = ev.clientY;
+            const p = pointers.get(ev.pointerId);
+            if (!p) return;
+            this._gestures.move(ev.pointerId, ev.clientX, ev.clientY);
+            if (pointers.size === 1) this.rig.orbit(ev.clientX - p.x, ev.clientY - p.y);
+            p.x = ev.clientX;
+            p.y = ev.clientY;
         };
-        const up = () => { dragging = false; };
+        const up = (ev: PointerEvent) => {
+            if (!pointers.delete(ev.pointerId)) return;
+            this._gestures.up(ev.pointerId, ev.clientX, ev.clientY, ev.timeStamp);
+        };
+        const cancel = (ev: PointerEvent) => {
+            pointers.delete(ev.pointerId);
+            this._gestures.cancel(ev.pointerId);
+        };
         const wheel = (ev: WheelEvent) => {
             ev.preventDefault();
             this.rig.dolly(ev.deltaY);
@@ -117,8 +138,14 @@ export class Renderer3d implements SimRenderer {
         this.canvas.addEventListener('pointerdown', down);
         this.canvas.addEventListener('pointermove', move);
         this.canvas.addEventListener('pointerup', up);
-        this.canvas.addEventListener('pointercancel', up);
+        this.canvas.addEventListener('pointercancel', cancel);
         this.canvas.addEventListener('wheel', wheel, { passive: false });
+    }
+
+    private _applyGestures(): void {
+        const frame = this._gestures.update(performance.now());
+        if (frame.pinch !== 1 && frame.pinch > 0) this.rig.distance = this.rig.distance / frame.pinch;
+        if (frame.gestures.includes('doubleTap')) this.resetCamera();
     }
 
     private _setupXR(): void {
@@ -132,19 +159,23 @@ export class Renderer3d implements SimRenderer {
         this.renderer.xr.addEventListener('sessionstart', onStart);
         this.renderer.xr.addEventListener('sessionend', onEnd);
 
-        // Only show the VR button where immersive VR actually exists.
-        navigator.xr?.isSessionSupported('immersive-vr').then((ok) => {
-            if (!ok || this._disposed) return;
-            this._vrButton = VRButton.createButton(this.renderer);
-            this._vrButton.classList.add('vr-button');
-            document.body.append(this._vrButton);
-        }).catch(() => { /* no XR */ });
-
         this._cleanup.push(() => {
             this.renderer.xr.removeEventListener('sessionstart', onStart);
             this.renderer.xr.removeEventListener('sessionend', onEnd);
-            this._vrButton?.remove();
+            void this.renderer.xr.getSession()?.end();
         });
+    }
+
+    async enterVR(): Promise<void> {
+        const current = this.renderer.xr.getSession();
+        if (current) {
+            await current.end();
+            return;
+        }
+        const session = await navigator.xr!.requestSession('immersive-vr', {
+            optionalFeatures: ['local-floor', 'bounded-floor', 'hand-tracking'],
+        });
+        await this.renderer.xr.setSession(session);
     }
 
     start(frame: (dt: number) => void): void {
@@ -168,7 +199,7 @@ export class Renderer3d implements SimRenderer {
         }
     }
 
-    render(sim: Simulation, view: ViewOptions): void {
+    render(sim: SimView, view: ViewOptions): void {
         if (!this.renderer.xr.isPresenting) this._resize();
 
         if (this._capacity !== sim.count) {
@@ -196,11 +227,15 @@ export class Renderer3d implements SimRenderer {
         this._material.uniforms.pointSize.value = view.pointSize;
         this._bounds.visible = view.showBounds;
 
+        this._applyGestures();
+        const now = performance.now();
+        this.rig.update(this._lastRender ? Math.min((now - this._lastRender) / 1000, 0.1) : 0);
+        this._lastRender = now;
+
         this.renderer.render(this.scene, this.rig.camera);
     }
 
     dispose(): void {
-        this._disposed = true;
         this.renderer.setAnimationLoop(null);
         this._cleanup.forEach((fn) => fn());
         this._geometry.dispose();

@@ -1,4 +1,4 @@
-import { Rng } from '../utils/rng';
+import { Rng } from '@n3rdw1z4rd/core';
 import { spawn, WorldConfig } from './world';
 
 export type ForceFn = (r: number, a: number, beta: number) => number;
@@ -148,9 +148,9 @@ export class Simulation {
         type.set(this.type.subarray(0, keep));
 
         for (let i = keep; i < n; i++) {
-            pos[i * 3] = this.rng.nextf;
-            pos[i * 3 + 1] = this.rng.nextf;
-            pos[i * 3 + 2] = this.dims === 3 ? this.rng.nextf : 0;
+            pos[i * 3] = this.rng.nextFloat();
+            pos[i * 3 + 1] = this.rng.nextFloat();
+            pos[i * 3 + 2] = this.dims === 3 ? this.rng.nextFloat() : 0;
             type[i] = this.rng.range(this.k);
         }
 
@@ -168,7 +168,7 @@ export class Simulation {
     setSpeciesCount(k: number, newEntries?: () => number): void {
         if (k === this.k || k < 1) return;
 
-        const rand = newEntries ?? (() => this.rng.nextf * 2 - 1);
+        const rand = newEntries ?? (() => this.rng.nextFloat() * 2 - 1);
         const old = this.matrix;
         const oldK = this.k;
         const m = new Float32Array(k * k);
@@ -181,7 +181,7 @@ export class Simulation {
 
         for (let i = 0; i < this.count; i++) {
             if (k > oldK) {
-                if (this.rng.nextf < (k - oldK) / k) this.type[i] = oldK + this.rng.range(k - oldK);
+                if (this.rng.nextFloat() < (k - oldK) / k) this.type[i] = oldK + this.rng.range(k - oldK);
             } else if (this.type[i] >= k) {
                 this.type[i] = this.rng.range(k);
             }
@@ -197,7 +197,7 @@ export class Simulation {
         this.dims = dims;
 
         for (let i = 0; i < this.count; i++) {
-            this.pos[i * 3 + 2] = dims === 3 ? this.rng.nextf : 0;
+            this.pos[i * 3 + 2] = dims === 3 ? this.rng.nextFloat() : 0;
             this.vel[i * 3 + 2] = 0;
         }
 
@@ -381,9 +381,9 @@ export class Simulation {
             const i3 = i * 3;
             if (!Number.isFinite(this.pos[i3] + this.pos[i3 + 1] + this.pos[i3 + 2] + this.vel[i3] + this.vel[i3 + 1] + this.vel[i3 + 2])) {
                 bad++;
-                this.pos[i3] = this.rng.nextf;
-                this.pos[i3 + 1] = this.rng.nextf;
-                this.pos[i3 + 2] = this.dims === 3 ? this.rng.nextf : 0;
+                this.pos[i3] = this.rng.nextFloat();
+                this.pos[i3 + 1] = this.rng.nextFloat();
+                this.pos[i3 + 2] = this.dims === 3 ? this.rng.nextFloat() : 0;
                 this.vel[i3] = this.vel[i3 + 1] = this.vel[i3 + 2] = 0;
             }
         }

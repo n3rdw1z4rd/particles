@@ -1,3 +1,4 @@
+import { GestureRecognizer } from '@n3rdw1z4rd/core';
 import { Signal } from '@n3rdw1z4rd/smoke-ui';
 import { markDirty, onFrame, sim, species } from '../app/store';
 
@@ -16,12 +17,17 @@ function cellColor(v: number): string {
  *
  * - Drag a cell up/down to change it (Shift = fine)
  * - Scroll over a cell to nudge it
- * - Double-click a cell to zero it
+ * - Double-click / double-tap / long-press a cell to zero it
+ * - Tap a cell (touch) to read its value
  *
  * Rows are "this species", columns are "feels about that species".
  */
 export function MatrixEditor(): HTMLElement {
-    const readout = new Signal('drag a cell ↕ · scroll to nudge · double-click = 0');
+    const readout = new Signal(
+        matchMedia('(pointer: coarse)').matches
+            ? 'tap to read · drag ↕ to change · double-tap or hold = 0'
+            : 'drag a cell ↕ · scroll to nudge · double-click = 0',
+    );
 
     const canvas = document.createElement('canvas');
     canvas.className = 'matrix-canvas';
@@ -49,7 +55,9 @@ export function MatrixEditor(): HTMLElement {
         return { width, k, cell, height: HEADER + cell * k };
     };
 
-    const cellAt = (ev: MouseEvent): [number, number] | null => {
+    const gestures = new GestureRecognizer();
+
+    const cellAt = (ev: { clientX: number; clientY: number }): [number, number] | null => {
         const { k, cell } = layout();
         const rect = canvas.getBoundingClientRect();
         const b = Math.floor((ev.clientX - rect.left - HEADER) / cell);
@@ -121,12 +129,17 @@ export function MatrixEditor(): HTMLElement {
     canvas.addEventListener('pointerdown', (ev) => {
         const hit = cellAt(ev);
         if (!hit) return;
+        gestures.down(ev.pointerId, ev.clientX, ev.clientY, ev.timeStamp);
         drag = { a: hit[0], b: hit[1], y: ev.clientY, start: sim.get(hit[0], hit[1]) };
+        hover = hit;
+        describe(hit[0], hit[1]);
+        draw();
         canvas.setPointerCapture(ev.pointerId);
         ev.preventDefault();
     });
 
     canvas.addEventListener('pointermove', (ev) => {
+        gestures.move(ev.pointerId, ev.clientX, ev.clientY);
         if (drag) {
             const sens = ev.shiftKey ? DRAG_SENSITIVITY / 5 : DRAG_SENSITIVITY;
             sim.set(drag.a, drag.b, drag.start - (ev.clientY - drag.y) * sens);
@@ -142,24 +155,33 @@ export function MatrixEditor(): HTMLElement {
     });
 
     const endDrag = () => {
-        if (drag) markDirty();
+        if (drag && sim.get(drag.a, drag.b) !== drag.start) markDirty();
         drag = null;
     };
-    canvas.addEventListener('pointerup', endDrag);
-    canvas.addEventListener('pointercancel', endDrag);
-    canvas.addEventListener('pointerleave', () => {
-        if (drag) return;
+    canvas.addEventListener('pointerup', (ev) => {
+        gestures.up(ev.pointerId, ev.clientX, ev.clientY, ev.timeStamp);
+        endDrag();
+    });
+    canvas.addEventListener('pointercancel', (ev) => {
+        gestures.cancel(ev.pointerId);
+        endDrag();
+    });
+    canvas.addEventListener('pointerleave', (ev) => {
+        if (drag || ev.pointerType === 'touch') return;
         hover = null;
         draw();
     });
 
-    canvas.addEventListener('dblclick', (ev) => {
-        const hit = cellAt(ev);
-        if (!hit) return;
+    // Double-tap / double-click / long-press zeroes a cell (works the same for mouse and touch).
+    const zeroAt = (x: number, y: number) => {
+        const rect = canvas.getBoundingClientRect();
+        const hit = cellAt({ clientX: x, clientY: y });
+        if (!hit || x < rect.left || y < rect.top) return;
+        drag = null;
         sim.set(hit[0], hit[1], 0);
         describe(hit[0], hit[1]);
         markDirty();
-    });
+    };
 
     canvas.addEventListener('wheel', (ev) => {
         const hit = cellAt(ev);
@@ -173,6 +195,10 @@ export function MatrixEditor(): HTMLElement {
 
     // Redraw only when something actually changed (UI edit, script, preset, resize).
     onFrame(() => {
+        for (const e of gestures.update(performance.now()).events) {
+            if (e.gesture === 'doubleTap' || e.gesture === 'longPress') zeroAt(e.x, e.y);
+        }
+
         if (
             sim !== drawnSim ||
             sim.matrixVersion !== drawnVersion ||
