@@ -194,6 +194,12 @@ export function resetWorld(): void {
     runSetup();
 }
 
+export async function resetAll() {
+    const cfg = defaultConfig();
+    await loadConfig(cfg);
+    markDirty();
+}
+
 /** Loads the world for `newSeed`: fresh particles and a fresh seeded matrix. */
 export function loadSeed(newSeed: number): void {
     seed.set(newSeed | 0);

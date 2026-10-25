@@ -101,7 +101,13 @@ export function ScriptEditor(): HTMLElement {
     ) as HTMLElement;
 
     editorOpen.subscribe((open) => {
-        if (!open) return;
+        drawer.inert = !open;
+
+        if (!open) {
+            if (view?.hasFocus) view.contentDOM.blur();
+            return;
+        }
+
         void ensureEditor(host).then(() => view?.focus());
     });
 

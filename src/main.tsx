@@ -1,7 +1,7 @@
 import { computed } from '@n3rdw1z4rd/smoke-ui';
 import { setTheme } from '@n3rdw1z4rd/smoke-ui-components';
 import {
-    boot, count, dims, editorOpen, fps, newWorld, resetWorld, runScript, scriptSource,
+    boot, count, dims, editorOpen, fps, newWorld, resetWorld, resetAll, runScript, scriptSource,
     scriptState, seed, setDims, simTime, step, stopScript, togglePause,
 } from './app/store';
 import * as store from './app/store';
@@ -49,13 +49,14 @@ function isTyping(target: EventTarget | null): boolean {
 window.addEventListener('keydown', (ev) => {
     if (isTyping(ev.target) || ev.ctrlKey || ev.metaKey || ev.altKey) return;
 
-    switch (ev.key.toLowerCase()) {
+    switch (ev.key) {
         case ' ': togglePause(); break;
         case '.': step(); break;
         case 'r': resetWorld(); break;
+        case 'R': resetAll(); break;
         case 'n': newWorld(); break;
         case 'd': setDims(dims.get() === 2 ? 3 : 2); break;
-        case 'e': editorOpen.set(!editorOpen.get()); break;
+        case 'e': editorOpen.set(true); break;
         case 'h': document.body.classList.toggle('ui-hidden'); break;
         default: return;
     }

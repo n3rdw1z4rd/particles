@@ -113,7 +113,7 @@ export function ControlPanel(): HTMLElement {
                     <Slider label="speed" signal={timeScale} min={0} max={3} step={0.05} />
                 </Section>
 
-                <Section title="species">
+                <Section title="species" open={false}>
                     <div className="row-buttons">
                         <SpeciesList />
                         <span className="spacer" />
@@ -122,7 +122,7 @@ export function ControlPanel(): HTMLElement {
                     </div>
                 </Section>
 
-                <Section title="attraction matrix">
+                <Section title="attraction matrix" open={false}>
                     <MatrixEditor />
                     <div className="row-buttons wrap">
                         <Button label="random" onClick={() => applyMatrixPreset('random')} />
@@ -133,7 +133,7 @@ export function ControlPanel(): HTMLElement {
                     </div>
                 </Section>
 
-                <Section title="physics">
+                <Section title="physics" open={false}>
                     <Slider label="range" signal={range} min={0.02} max={0.4} step={0.005} />
                     <Slider label="friction t½" signal={frictionHalfLife} min={0.005} max={0.5} step={0.005} />
                     <Slider label="force" signal={forceScale} min={0} max={0.5} step={0.005} />
@@ -150,7 +150,7 @@ export function ControlPanel(): HTMLElement {
                     </div>
                 </Section>
 
-                <Section title="script">
+                <Section title="script" open={false}>
                     <div className="row-buttons">
                         <span className={scriptLabelClass}>{scriptLabel}</span>
                         <span className="spacer" />
@@ -175,7 +175,7 @@ export function ControlPanel(): HTMLElement {
                 </Section>
 
                 <div className="shortcuts">
-                    space pause · . step · R reset · N new · D 2D/3D · E script · H hide
+                    space pause/play · . step · r reset · R reset all· n new · d 2D/3D · e script · h hide UI
                 </div>
             </Panel>
         </aside>
