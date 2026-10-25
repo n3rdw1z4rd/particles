@@ -7,7 +7,7 @@ import {
 } from '../core/world';
 import { Renderer2d } from '../render/renderer-2d';
 import type { SimRenderer, ViewOptions } from '../render/types';
-import { Rng } from '../utils/rng';
+import { Rng } from '@n3rdw1z4rd/core';
 import { toast } from '../ui/toast';
 
 /* ------------------------------------------------------------------ */
@@ -259,7 +259,7 @@ export function applyMatrixPreset(preset: MatrixPreset): void {
     for (let a = 0; a < k; a++) {
         for (let b = 0; b < k; b++) {
             switch (preset) {
-                case 'random': m[a][b] = rng.nextf * 2 - 1; break;
+                case 'random': m[a][b] = rng.nextFloat() * 2 - 1; break;
                 case 'zero': m[a][b] = 0; break;
                 case 'invert': m[a][b] = -m[a][b]; break;
                 case 'symmetric': if (b > a) m[a][b] = m[b][a] = (m[a][b] + m[b][a]) / 2; break;

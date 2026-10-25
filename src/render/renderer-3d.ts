@@ -4,7 +4,7 @@ import {
 } from 'three';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 import type { Simulation } from '../core/simulation';
-import { ThreeJsCameraRig } from '../utils/three/threejs-camera-rig';
+import { CameraRig } from '@n3rdw1z4rd/core/three';
 import { hexToRgb, SimRenderer, ViewOptions } from './types';
 
 const vertexShader = /* glsl */ `
@@ -35,7 +35,7 @@ void main() {
 export class Renderer3d implements SimRenderer {
     readonly renderer: WebGLRenderer;
     readonly scene = new Scene();
-    readonly rig = new ThreeJsCameraRig({ fov: 75, near: 0.01, far: 100 });
+    readonly rig = new CameraRig({ fov: 75, near: 0.01, far: 100, distance: 1.6 });
 
     private _world = new Group();
     private _geometry = new BufferGeometry();
@@ -43,6 +43,7 @@ export class Renderer3d implements SimRenderer {
     private _bounds: LineSegments;
     private _capacity = 0;
     private _last = 0;
+    private _lastRender = 0;
     private _vrButton: HTMLElement | null = null;
     private _disposed = false;
     private _size = new Vector2();
@@ -59,10 +60,13 @@ export class Renderer3d implements SimRenderer {
         parent.prepend(this.canvas);
 
         this.scene.add(this.rig);
-        this.rig.camera.position.z = 1.6;
-        this.rig.minCameraDistance = 0;
-        this.rig.maxCameraDistance = 6;
-        this.rig.wheelSensitivity = 0.001;
+        // Orbit the cube's centre; no first-person mode, full pitch range.
+        this.rig.minDistance = 0.05;
+        this.rig.maxDistance = 6;
+        this.rig.distance = 1.6;
+        this.rig.orbitSensitivity = 0.01;
+        this.rig.pitchLimits = { min: -Math.PI / 2 + 0.01, max: Math.PI / 2 - 0.01 };
+        this.rig.targetOffset.set(0, 0, 0);
 
         this._world.position.set(-0.5, -0.5, -0.5);
         this.scene.add(this._world);
@@ -195,6 +199,10 @@ export class Renderer3d implements SimRenderer {
 
         this._material.uniforms.pointSize.value = view.pointSize;
         this._bounds.visible = view.showBounds;
+
+        const now = performance.now();
+        this.rig.update(this._lastRender ? Math.min((now - this._lastRender) / 1000, 0.1) : 0);
+        this._lastRender = now;
 
         this.renderer.render(this.scene, this.rig.camera);
     }

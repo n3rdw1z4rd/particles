@@ -1,4 +1,4 @@
-import { Rng } from '../utils/rng';
+import { Rng } from '@n3rdw1z4rd/core';
 
 /**
  * A complete, serializable description of a world. Everything needed to
@@ -95,13 +95,11 @@ export interface Spawned {
 /**
  * Deterministically generates initial particles + a random matrix from the seed.
  *
- * The draw order deliberately mirrors the original engines so old `?seed=`
- * links produce the same world: the 2D engine generated the matrix first (a
- * class-field initializer), the 3D engine generated particles first.
+ * Uses `@n3rdw1z4rd/core`'s `Rng`, so a seed maps to the same world everywhere
+ * this version runs (worlds from before the switch to core will differ).
  */
 export function spawn(cfg: Pick<WorldConfig, 'seed' | 'dims' | 'count' | 'species'>): Spawned {
-    const rng = new Rng();
-    rng.seed = cfg.seed;
+    const rng = new Rng(cfg.seed);
 
     const k = cfg.species.length;
     const n = cfg.count;
@@ -111,22 +109,22 @@ export function spawn(cfg: Pick<WorldConfig, 'seed' | 'dims' | 'count' | 'specie
     let matrix: number[][] = [];
 
     if (cfg.dims === 2) {
-        matrix = rng.randomMatrix(k);
+        matrix = rng.transformMatrix(k);
 
         for (let i = 0; i < n; i++) {
-            pos[i * 3] = rng.nextf;
-            pos[i * 3 + 1] = rng.nextf;
+            pos[i * 3] = rng.nextFloat();
+            pos[i * 3 + 1] = rng.nextFloat();
             type[i] = rng.range(k);
         }
     } else {
         for (let i = 0; i < n; i++) {
-            pos[i * 3] = rng.nextf;
-            pos[i * 3 + 1] = rng.nextf;
-            pos[i * 3 + 2] = rng.nextf;
+            pos[i * 3] = rng.nextFloat();
+            pos[i * 3 + 1] = rng.nextFloat();
+            pos[i * 3 + 2] = rng.nextFloat();
             type[i] = rng.range(k);
         }
 
-        matrix = rng.randomMatrix(k);
+        matrix = rng.transformMatrix(k);
     }
 
     return { pos, type, matrix };
