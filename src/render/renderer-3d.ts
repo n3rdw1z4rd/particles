@@ -2,7 +2,7 @@ import {
     BoxGeometry, BufferAttribute, BufferGeometry, EdgesGeometry, Group, LineBasicMaterial,
     LineSegments, Points, Scene, ShaderMaterial, Vector2, WebGLRenderer,
 } from 'three';
-import type { Simulation } from '../core/simulation';
+import type { SimView } from '../sim/sim-client';
 import { GestureRecognizer } from '@n3rdw1z4rd/core';
 import { CameraRig } from '@n3rdw1z4rd/core/three';
 import { hexToRgb, SimRenderer, ViewOptions } from './types';
@@ -199,7 +199,7 @@ export class Renderer3d implements SimRenderer {
         }
     }
 
-    render(sim: Simulation, view: ViewOptions): void {
+    render(sim: SimView, view: ViewOptions): void {
         if (!this.renderer.xr.isPresenting) this._resize();
 
         if (this._capacity !== sim.count) {

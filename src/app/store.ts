@@ -1,6 +1,7 @@
 import { computed, Signal } from '@n3rdw1z4rd/smoke-ui';
-import { compileScript, describeError, ScriptHooks } from '../core/script';
-import { Simulation } from '../core/simulation';
+import { describeError } from '../core/script';
+import type { SimParams } from '../core/simulation';
+import { HANG_MS, SimClient } from '../sim/sim-client';
 import {
     DEFAULT_SPECIES, DIM_DEFAULTS, MAX_SPECIES, Species, WorldConfig,
     decodeConfig, defaultConfig, encodeConfig, hashString, normalizeConfig, randomSeed, spawn,
@@ -9,6 +10,7 @@ import { Renderer2d } from '../render/renderer-2d';
 import type { SimRenderer, ViewOptions } from '../render/types';
 import { Rng } from '@n3rdw1z4rd/core';
 import { toast } from '../ui/toast';
+import { autoTune, minSimRate } from './ui-state';
 
 /* ------------------------------------------------------------------ */
 /* Reactive state — every control in the UI binds straight to these.   */
@@ -16,7 +18,10 @@ import { toast } from '../ui/toast';
 
 export const dims = new Signal<2 | 3>(2);
 export const seed = new Signal(0);
+/** Particles requested (the slider). With auto-tune on, this is the maximum. */
 export const count = new Signal(2000);
+/** Particles actually simulated: equals `count` unless the auto-tuner has lowered it. */
+export const activeCount = new Signal(2000);
 export const species = new Signal<Species[]>([]);
 export const range = new Signal(0.1);
 export const frictionHalfLife = new Signal(0.04);
@@ -29,6 +34,8 @@ export const showBounds = new Signal(true);
 export const paused = new Signal(false);
 
 export const fps = new Signal(0);
+/** Simulation steps per second and average ms per step, from the worker. */
+export const simRate = new Signal('–');
 
 /** True when this browser can enter immersive VR. */
 export const vrAvailable = new Signal(false);
@@ -60,11 +67,36 @@ export const editorOpen = new Signal(false);
 let root: HTMLElement;
 let renderer: SimRenderer | null = null;
 let mountToken = 0;
-let hooks: ScriptHooks | null = null;
 let stepOnce = false;
 const frameListeners = new Set<() => void>();
 
-export let sim: Simulation;
+/** Main-thread handle to the simulation, which runs in a Web Worker. */
+export let sim: SimClient;
+
+function createSim(): void {
+    sim = new SimClient();
+    sim.onScriptError = (message) => stopScript({ kind: 'error', message });
+    sim.onError.subscribe((err) => {
+        console.error('simulation worker error', err);
+        restartSim('The simulation worker crashed and was restarted.');
+    });
+}
+
+/**
+ * Replaces a stuck or crashed worker with a fresh one, keeping the particles
+ * where they were in the last frame. The script (the usual culprit) is not
+ * restarted; its source stays in the editor.
+ */
+function restartSim(message: string): void {
+    const last = sim;
+    const cfg = { ...snapshot(), script: '' };
+    last.dispose(message);
+    createSim();
+    sim.restore(cfg, last);
+    runningScript.set('');
+    scriptState.set({ kind: 'error', message });
+    toast(message, true);
+}
 
 /** Called once per rendered frame (used by the matrix editor to stay in sync). */
 export function onFrame(fn: () => void): () => void {
@@ -100,12 +132,14 @@ let applying = false;
 function applyConfig(cfg: WorldConfig): void {
     applying = true;
     try {
-        const dimsChanged = !sim || sim.dims !== cfg.dims;
-        sim = new Simulation(cfg);
+        const dimsChanged = !renderer || dims.get() !== cfg.dims;
+        if (!sim) createSim();
+        sim.load(cfg);
 
         dims.set(cfg.dims);
         seed.set(cfg.seed);
         count.set(cfg.count);
+        activeCount.set(cfg.count);
         species.set(cfg.species);
         range.set(cfg.range);
         frictionHalfLife.set(cfg.frictionHalfLife);
@@ -153,25 +187,20 @@ function frame(dt: number): void {
     if (fpsTime >= 0.5) {
         fps.set(Math.round(fpsFrames / fpsTime));
         simTime.set(sim.time.toFixed(1));
+        simRate.set(paused.get() ? 'paused' : `${sim.stepsPerSecond}/s (${sim.stepMs.toFixed(1)} ms)`);
         fpsFrames = 0;
         fpsTime = 0;
     }
 
-    if (!paused.get() || stepOnce) {
-        const stepDt = stepOnce ? 1 / 60 : dt;
-        stepOnce = false;
-
-        try {
-            hooks?.step?.(sim, stepDt);
-            sim.step(stepDt);
-        } catch (err) {
-            stopScript({ kind: 'error', message: `Runtime error — script stopped.\n${describeError(err)}` });
-        }
-
-        if (sim.repairNonFinite() > 0 && hooks) {
-            stopScript({ kind: 'error', message: 'Script produced NaN/Infinity positions — script stopped and particles repaired.' });
-        }
+    if (sim.hung) {
+        restartSim(`The simulation stopped responding for ${HANG_MS / 1000}s (probably a script stuck in a loop) — it was restarted without the script.`);
     }
+
+    tuneParticleCount();
+
+    // Ask the worker for the next step; until it answers we redraw the last frame.
+    sim.tick(!paused.get(), stepOnce ? 1 / 60 : undefined);
+    stepOnce = false;
 
     const view: ViewOptions = {
         species: species.get(),
@@ -182,6 +211,49 @@ function frame(dt: number): void {
 
     renderer?.render(sim, view);
     frameListeners.forEach((fn) => fn());
+}
+
+/* ------------------------------------------------------------------ */
+/* Auto-tune                                                            */
+/* ------------------------------------------------------------------ */
+
+let tuneAt = 0;
+
+/**
+ * Keeps the simulation above `minSimRate` steps/s by adjusting how many
+ * particles actually run (never more than the slider's `count`).
+ *
+ * Step cost grows roughly with the square of the particle count (every
+ * particle checks a neighbourhood whose population grows with the count), so
+ * the correction is the square root of the time ratio. After a change it waits
+ * for fresh measurements before deciding again.
+ */
+function tuneParticleCount(): void {
+    const now = performance.now();
+    if (now < tuneAt || !autoTune.get() || paused.get() || sim.stepsPerSecond === 0 || sim.stepMs <= 0) return;
+
+    // ms per step we can afford, leaving a little room for messaging; the
+    // simulation can't usefully outrun the screen, so targets above ~55/s cap there.
+    const budget = (1000 / Math.min(minSimRate.get(), 55)) * 0.9;
+    const ms = sim.stepMs;
+    const current = activeCount.get();
+    const max = count.get();
+    let next = current;
+
+    if (ms > budget) {
+        next = current * Math.max(0.5, Math.sqrt(budget / ms) * 0.95);
+    } else if (ms < budget * 0.6 && current < max) {
+        next = current * Math.min(1.25, Math.sqrt((budget * 0.8) / ms));
+    }
+
+    next = Math.max(100, Math.min(max, Math.round(next / 100) * 100));
+
+    if (next !== current) {
+        activeCount.set(next);
+        tuneAt = now + 1500;
+    } else {
+        tuneAt = now + 500;
+    }
 }
 
 /* ------------------------------------------------------------------ */
@@ -199,8 +271,8 @@ export function step(): void {
 
 /** Respawns particles from the current seed, keeping the matrix and params. */
 export function resetWorld(): void {
-    sim.respawn({ seed: seed.get(), dims: dims.get(), count: count.get(), species: species.get() });
-    runSetup();
+    // The worker re-runs the script's setup() after respawning.
+    sim.respawn({ seed: seed.get(), dims: dims.get(), count: activeCount.get(), species: species.get() });
 }
 
 export async function resetAll() {
@@ -303,15 +375,6 @@ function trust(source: string): void {
     } catch { /* storage unavailable — fine */ }
 }
 
-function runSetup(): void {
-    if (!hooks?.setup) return;
-    try {
-        hooks.setup(sim);
-    } catch (err) {
-        stopScript({ kind: 'error', message: `setup() threw — script stopped.\n${describeError(err)}` });
-    }
-}
-
 export async function runScript(source = scriptSource.get()): Promise<boolean> {
     scriptSource.set(source);
 
@@ -320,25 +383,22 @@ export async function runScript(source = scriptSource.get()): Promise<boolean> {
         return true;
     }
 
-    try {
-        const compiled = await compileScript(source);
-        hooks = compiled;
-        sim.force = compiled.force ?? null;
-        runningScript.set(source);
-        scriptState.set({ kind: 'running' });
-        trust(source);
-        runSetup();
-        markDirty();
-        return scriptState.get().kind === 'running';
-    } catch (err) {
-        stopScript({ kind: 'error', message: describeError(err) });
+    // Compiles and starts in the worker (including setup()).
+    const result = await sim.runScript(source);
+    if (!result.ok) {
+        stopScript({ kind: 'error', message: result.error ?? 'Script failed to start.' });
         return false;
     }
+
+    runningScript.set(source);
+    scriptState.set({ kind: 'running' });
+    trust(source);
+    markDirty();
+    return true;
 }
 
 export function stopScript(state: ScriptState = { kind: 'off' }): void {
-    hooks = null;
-    if (sim) sim.force = null;
+    sim?.stopScript();
     runningScript.set('');
     scriptState.set(state);
     markDirty();
@@ -459,20 +519,25 @@ export async function boot(container: HTMLElement): Promise<void> {
     await loadConfig(cfg, { fromUntrusted: true });
 
     // Live parameters flow straight into the running simulation.
-    const live: [Signal<number>, keyof Simulation['params']][] = [
+    const live: [Signal<number>, keyof SimParams][] = [
         [range, 'range'], [frictionHalfLife, 'frictionHalfLife'], [forceScale, 'forceScale'],
         [beta, 'beta'], [timeScale, 'timeScale'],
     ];
     for (const [signal, key] of live) {
         signal.subscribe((v) => {
-            sim.params[key] = v;
+            sim.setParams({ [key]: v });
             markDirty();
         });
     }
 
+    // A new slider value is tried as-is; the auto-tuner lowers it again if it's too slow.
     count.subscribe((n) => {
-        sim.setCount(n);
+        activeCount.set(n);
         markDirty();
+    });
+    activeCount.subscribe((n) => sim.setCount(n));
+    autoTune.subscribe((on) => {
+        if (!on) activeCount.set(count.get());
     });
     pointSize.subscribe(() => markDirty());
     trails.subscribe(() => markDirty());

@@ -1,4 +1,4 @@
-import type { Simulation } from '../core/simulation';
+import type { SimView } from '../sim/sim-client';
 import type { Species } from '../core/world';
 
 export interface ViewOptions {
@@ -12,7 +12,7 @@ export interface SimRenderer {
     readonly canvas: HTMLCanvasElement;
     /** Starts the render loop; `frame` receives real elapsed seconds. */
     start(frame: (dt: number) => void): void;
-    render(sim: Simulation, view: ViewOptions): void;
+    render(sim: SimView, view: ViewOptions): void;
     dispose(): void;
     /** Starts or ends an immersive VR session (3D only). */
     enterVR?(): Promise<void>;

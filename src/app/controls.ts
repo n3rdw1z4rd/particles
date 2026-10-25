@@ -5,7 +5,7 @@ import {
     scriptState, setDims, setSpeciesCount, shareLink, showBounds, species, step, timeScale,
     togglePause, trails,
 } from './store';
-import { DockEdge, dockEdge, toggleUi } from './ui-state';
+import { autoTune, DockEdge, dockEdge, minSimRate, toggleUi } from './ui-state';
 import { MAX_SPECIES } from '../core/world';
 
 /* ------------------------------------------------------------------ */
@@ -113,6 +113,8 @@ export const SECTIONS: Section[] = [
                 ],
             },
             { kind: 'slider', label: 'particles', signal: count, min: 100, max: 10000, step: 100 },
+            { kind: 'toggle', label: 'auto-limit', signal: autoTune },
+            { kind: 'slider', label: 'min sim fps', signal: minSimRate, min: 5, max: 60, step: 1, visible: autoTune },
             { kind: 'slider', label: 'speed', signal: timeScale, min: 0, max: 3, step: 0.05 },
         ],
     },

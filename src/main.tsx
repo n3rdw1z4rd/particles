@@ -1,7 +1,7 @@
 import { computed } from '@n3rdw1z4rd/smoke-ui';
 import { setTheme } from '@n3rdw1z4rd/smoke-ui-components';
 import {
-    boot, count, dims, editorOpen, fps, newWorld, resetWorld, resetAll, runScript, scriptSource,
+    activeCount, boot, count, dims, editorOpen, fps, newWorld, simRate, resetWorld, resetAll, runScript, scriptSource,
     scriptState, seed, setDims, simTime, step, stopScript, togglePause,
 } from './app/store';
 import * as store from './app/store';
@@ -22,7 +22,7 @@ setTheme({
 
 const Stats = () => (
     <div className="stats">
-        <span>{fps}</span> fps · <span>{count}</span> · {computed(() => `${dims.get()}D`)} · seed <span>{seed}</span> · t <span>{simTime}</span>s
+        <span>{fps}</span> fps · sim <span>{simRate}</span> · <span>{computed(() => (activeCount.get() === count.get() ? String(count.get()) : `${activeCount.get()}/${count.get()}`))}</span> · {computed(() => `${dims.get()}D`)} · seed <span>{seed}</span> · t <span>{simTime}</span>s
     </div>
 );
 

@@ -13,6 +13,8 @@ interface StoredUi {
     open?: boolean;
     tab?: string;
     sheet?: number;
+    autoTune?: boolean;
+    minSimRate?: number;
 }
 
 function load(): StoredUi {
@@ -43,12 +45,16 @@ export const activeTab = new Signal<string>(stored.tab ?? 'world');
 export const sheetFraction = new Signal<number>(
     typeof stored.sheet === 'number' ? Math.min(0.85, Math.max(0.2, stored.sheet)) : 0.5,
 );
+/** Lower the particle count automatically when the simulation can't keep up. */
+export const autoTune = new Signal<boolean>(stored.autoTune ?? true);
+/** Steps per second the auto-tuner tries to stay above. */
+export const minSimRate = new Signal<number>(typeof stored.minSimRate === 'number' ? stored.minSimRate : 20);
 /** Hides the dock and stats; the action bar shrinks to a single "show UI" button. */
 export const uiHidden = new Signal(false);
 
 function save(): void {
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ edge: dockEdge.get(), open: dockOpen.get(), tab: activeTab.get(), sheet: sheetFraction.get() }));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ edge: dockEdge.get(), open: dockOpen.get(), tab: activeTab.get(), sheet: sheetFraction.get(), autoTune: autoTune.get(), minSimRate: minSimRate.get() }));
     } catch { /* storage unavailable — fine */ }
 }
 
@@ -56,6 +62,8 @@ dockEdge.subscribe(save);
 dockOpen.subscribe(save);
 activeTab.subscribe(save);
 sheetFraction.subscribe(save);
+autoTune.subscribe(save);
+minSimRate.subscribe(save);
 
 export function toggleDock(): void {
     dockOpen.set(!dockOpen.get());
