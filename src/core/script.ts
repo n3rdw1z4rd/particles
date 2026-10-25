@@ -4,7 +4,7 @@ import type { ForceFn, Simulation } from './simulation';
  * A user script is a plain ES module. Every export is optional:
  *
  *   export function force(r, a, beta) { ... }  // pairwise force curve (hot path!)
- *   export function setup(sim) { ... }         // after Run and after every reset
+ *   export function setup(sim) { ... }         // after Run and after every restart
  *   export function step(sim, dt) { ... }      // every frame, before physics
  */
 export interface ScriptHooks {
@@ -58,7 +58,7 @@ const API_DOC = `// ── Particle script ────────────�
 //       r    distance / range, in [0, 1)
 //       a    matrix entry for (this species → other species), in [-1, 1]
 //       beta close-range repulsion cutoff
-//   setup(sim)                   after Run and after every reset
+//   setup(sim)                   after Run and after every restart
 //   step(sim, dt)                every frame, before physics
 //
 // sim:

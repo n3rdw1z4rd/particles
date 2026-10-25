@@ -1,7 +1,7 @@
 import { computed, Signal } from '@n3rdw1z4rd/smoke-ui';
 import {
     applyMatrixPreset, beta, count, dims, editorOpen, exportJson, forceScale, frictionHalfLife,
-    newWorld, paused, pickAndImportJson, pointSize, range, resetWorld, runScript, scriptSource,
+    newWorld, paused, pickAndImportJson, pointSize, range, requestResetAll, restartWorld, runScript, scriptSource,
     scriptState, setDims, setSpeciesCount, shareLink, showBounds, species, step, timeScale,
     togglePause, trails,
 } from './store';
@@ -88,7 +88,7 @@ const when = (fn: () => boolean) => computed(fn);
 
 const scriptStatus = computed(() => {
     const s = scriptState.get();
-    return s.kind === 'running' ? '● script running' : s.kind === 'error' ? '✖ script error' : s.kind === 'pending' ? '⚠ script waiting' : '○ no script';
+    return s.kind === 'running' ? '● script running' : s.kind === 'error' ? '✖ script error' : s.kind === 'pending' ? '⚠ script waiting' : s.kind === 'stopped' ? '■ script stopped' : '○ no script';
 });
 
 export const SECTIONS: Section[] = [
@@ -101,15 +101,16 @@ export const SECTIONS: Section[] = [
                 controls: [
                     { kind: 'choice', options: [{ value: 2, label: '2D' }, { value: 3, label: '3D' }], value: dims, select: setDims },
                     { kind: 'custom', id: 'seed' },
-                    { kind: 'button', label: '🎲', title: 'new random world (N)', action: newWorld },
+                    { kind: 'button', label: '🎲', title: 'new random world (n)', action: newWorld },
                 ],
             },
             {
                 kind: 'row',
                 controls: [
-                    { kind: 'button', label: computed(() => (paused.get() ? '▶ play' : '❚❚ pause')), title: 'Space', action: togglePause },
+                    { kind: 'button', label: computed(() => (paused.get() ? '▶ play' : '❚❚ pause')), title: 'pause / play (space)', action: togglePause },
                     { kind: 'button', label: 'step', title: 'advance one frame (.)', action: step },
-                    { kind: 'button', label: 'reset', title: 'respawn particles from the seed, keep the matrix (R)', action: resetWorld },
+                    { kind: 'button', label: 'restart', title: 'restart simulation (r)', action: restartWorld },
+                    { kind: 'button', label: 'reset', title: 'reset everything (R)', action: requestResetAll },
                 ],
             },
             { kind: 'slider', label: 'particles', signal: count, min: 100, max: 10000, step: 100 },
@@ -179,7 +180,7 @@ export const SECTIONS: Section[] = [
                     {
                         kind: 'button',
                         label: computed(() => (scriptState.get().kind === 'pending' ? 'review' : 'edit')),
-                        title: 'open the script editor (E)',
+                        title: 'open the script editor (e)',
                         action: () => editorOpen.set(true),
                     },
                 ],
@@ -217,10 +218,10 @@ export const SECTIONS: Section[] = [
                 options: (['left', 'right', 'top', 'bottom'] as DockEdge[]).map((e) => ({ value: e, label: e })),
                 value: dockEdge,
             },
-            { kind: 'button', label: 'hide UI', title: 'H', action: toggleUi },
+            { kind: 'button', label: 'hide UI', title: 'hide UI (h)', action: toggleUi },
             {
                 kind: 'text',
-                text: 'space pause/play · . step · r reset · R reset all · n new · d 2D/3D · e script · p panel · h hide UI',
+                text: 'space pause/play · . step · r restart · R reset all · n new · d 2D/3D · e script · p panel · h hide UI',
                 tone: new Signal('shortcuts'),
             },
         ],

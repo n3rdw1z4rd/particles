@@ -64,7 +64,8 @@ function renderControl(control: Control): HTMLElement {
     const el = build(control);
     if (control.visible) {
         const visible = control.visible;
-        visible.subscribe((v) => (el.style.display = v ? '' : 'none'));
+        // `hidden` (not style.display) so a row's own inline display:flex survives being shown again.
+        visible.subscribe((v) => (el.hidden = !v));
     }
     return el;
 }

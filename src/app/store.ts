@@ -1,5 +1,5 @@
 import { computed, Signal } from '@n3rdw1z4rd/smoke-ui';
-import { describeError } from '../core/script';
+import { describeError, SCRIPT_EXAMPLES } from '../core/script';
 import type { SimParams } from '../core/simulation';
 import { HANG_MS, SimClient } from '../sim/sim-client';
 import {
@@ -49,6 +49,7 @@ export const simTime = new Signal('0.0');
 
 export type ScriptState =
     | { kind: 'off' }
+    | { kind: 'stopped' } // was running; the user stopped it
     | { kind: 'running' }
     | { kind: 'pending'; message: string } // from a shared link, not yet trusted
     | { kind: 'error'; message: string };
@@ -123,7 +124,8 @@ export function snapshot(): WorldConfig {
         timeScale: timeScale.get(),
         pointSize: pointSize.get(),
         trails: trails.get(),
-        script: runningScript.get() || scriptSource.get(),
+        // An untouched default template in the editor isn't part of the world.
+        script: runningScript.get() || (scriptSource.get() === SCRIPT_EXAMPLES[0].source ? '' : scriptSource.get()),
     };
 }
 
@@ -270,11 +272,19 @@ export function step(): void {
 }
 
 /** Respawns particles from the current seed, keeping the matrix and params. */
-export function resetWorld(): void {
+export function restartWorld(): void {
     // The worker re-runs the script's setup() after respawning.
     sim.respawn({ seed: seed.get(), dims: dims.get(), count: activeCount.get(), species: species.get() });
 }
 
+/** Opens the "reset everything?" confirmation (the dialog calls resetAll()). */
+export const confirmResetOpen = new Signal(false);
+
+export function requestResetAll(): void {
+    confirmResetOpen.set(true);
+}
+
+/** Fresh random 2D world with default settings; stops the script and clears the editor. */
 export async function resetAll() {
     const cfg = defaultConfig();
     await loadConfig(cfg);
@@ -286,7 +296,7 @@ export function loadSeed(newSeed: number): void {
     seed.set(newSeed | 0);
     const s = spawn({ seed: seed.get(), dims: dims.get(), count: count.get(), species: species.get() });
     sim.setMatrix(s.matrix);
-    resetWorld();
+    restartWorld();
     markDirty();
 }
 
