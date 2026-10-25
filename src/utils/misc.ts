@@ -1,4 +1,4 @@
-import { clamp } from './math';
+import { clamp, floor } from './math';
 
 export function isNullOrUndefined(target: any): boolean {
     return (target === null || target === undefined);
@@ -19,7 +19,7 @@ export const getRedYellowGreenGradientHex = (min: number, max?: number): string 
     }
 
     const percent = (min / max);
-    const index = clamp(Math.floor(percent * 10), 0, 10);
+    const index = clamp(floor(percent * 10), 0, 10);
 
     return ([
         '#ff0000', '#ff3300', '#ff6600', '#ff9900', '#ffcc00',

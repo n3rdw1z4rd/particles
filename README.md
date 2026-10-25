@@ -4,7 +4,7 @@ An emergent **particle-life** simulation written from scratch in TypeScript. Tho
 
 Runs in **2D** on a canvas renderer and in **3D** with full **WebXR (VR) support** — put on a headset and stand inside the simulation!
 
-### [Live Demo](https://particles.n3rdw1z4rd.io)
+### [Live Demo](https://particles.n3rdw1z4rd.cloud)
 
 ## What's going on here
 
