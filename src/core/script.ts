@@ -156,4 +156,19 @@ export function setup(sim) {
 }
 `,
     },
+    {
+        name: 'Falling',
+        source: `${API_DOC}
+// 
+const FALL_VELOCITY = -1.5; // units per second
+
+export function step(sim, dt) {
+    const vel = (sim.dims === 3 ? FALL_VELOCITY : -FALL_VELOCITY) * dt;
+
+    for (let i = 0; i < sim.count; i++) {
+        sim.vel[i * 3 + 1] += vel;
+    }
+}
+`,
+    }
 ];
