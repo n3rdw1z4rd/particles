@@ -82,6 +82,15 @@ export function Dock(): HTMLElement {
                         {s.title}
                     </button>
                 ))}
+
+                <a
+                    className={'tab tab-link'}
+                    href={'https://github.com/n3rdw1z4rd/particles'}
+                    target={'_blank'}
+                    rel={'noopener noreferrer'}
+                >
+                    {'github'}
+                </a>
             </nav>
             <div className="dock-body">{[...bodies.values()]}</div>
         </aside>

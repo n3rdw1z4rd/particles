@@ -214,6 +214,8 @@ body,
     padding: 0 8px;
     min-height: calc(var(--hit) - 4px);
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
 }
 
 .tab:hover { color: var(--smoke-fg); }
@@ -222,6 +224,8 @@ body,
     background: var(--smoke-accent);
     color: #0b0b0b;
 }
+
+.tab-link { margin-left: auto; }
 
 .dock-body {
     flex: 1;
