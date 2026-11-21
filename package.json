@@ -27,6 +27,10 @@
         "codemirror": "^6.0.2",
         "three": "^0.186.1"
     },
+    "dockerize": {
+        "port": 5170,
+        "network": "proxy-net"
+    },
     "allowScripts": {
         "fsevents@2.3.3": true
     }
